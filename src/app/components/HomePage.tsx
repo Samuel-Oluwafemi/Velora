@@ -4,6 +4,8 @@ import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import heroImage from "../../assets/images/heroImg.png";
 import Image from "../../assets/images/Versatile Style Power.jpg";
+import featuredImg from "../../assets/images/Collection.jpg"
+import featuredImg1 from "../../assets/images/Relaxed.png"
 interface HomePageProps {
   onNavigate: (page: string, productId?: string) => void;
 }
@@ -113,7 +115,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               }}
             >
               Every VELORA piece is made to outlast trends. We work with artisan
-              mills in Italy, Portugal, and Japan — sourcing only the materials
+              mills in USA, Italy, and Portugal — sourcing only the materials
               that improve with age. No fast-fashion shortcuts. No compromises.
             </p>
             <button
@@ -152,7 +154,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               >
                 Est.
                 <br />
-                2025
+                2026
               </span>
             </div>
           </div>
@@ -214,11 +216,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
             className="relative overflow-hidden"
             style={{ minHeight: "520px" }}
           >
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1779398970408-1454e2a126c2?w=900&h=700&fit=crop&auto=format"
+            <img
+              src={featuredImg}
               alt="Two women in black dresses — editorial"
-              className="w-full h-full object-cover"
-              style={{ minHeight: "520px" }}
+              className="w-full h-full object-cover object-top"
+              style={{ minHeight: "320px" }}
             />
             <div
               className="absolute inset-0 flex flex-col justify-end p-10 md:p-14"
@@ -266,8 +268,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             className="relative overflow-hidden"
             style={{ minHeight: "520px" }}
           >
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1681028442065-6d1a85eea2ef?w=900&h=700&fit=crop&auto=format"
+            <img
+              src={featuredImg1}
               alt="Two women on a train platform — travel editorial"
               className="w-full h-full object-cover"
               style={{ minHeight: "520px" }}
