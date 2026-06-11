@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Product } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import featuredImg from "../../assets/images/white tee1.jpg"
+import featuredImg1 from "../../assets/images/white tee1 style.jpg"
 
 interface ProductCardProps {
   product: Product;
@@ -19,7 +21,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
     >
       {/* Image */}
       <div className="relative overflow-hidden bg-secondary mb-4" style={{ aspectRatio: "3/4" }}>
-        <ImageWithFallback
+        <img
           src={hovered && product.images[1] ? product.images[1] : product.images[0]}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700"
