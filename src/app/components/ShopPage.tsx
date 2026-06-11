@@ -14,7 +14,7 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const filtered = PRODUCTS.filter(
-    (p) => activeCategory === "All" || p.category === activeCategory
+    (p) => activeCategory === "All" || p.category === activeCategory,
   ).sort((a, b) => {
     if (sortBy === "price-asc") return a.price - b.price;
     if (sortBy === "price-desc") return b.price - a.price;
@@ -33,7 +33,11 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
         </p>
         <h1
           className="text-foreground"
-          style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 300 }}
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "clamp(2rem, 4vw, 3rem)",
+            fontWeight: 300,
+          }}
         >
           All Products
         </h1>
@@ -54,9 +58,13 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
                   fontSize: "0.73rem",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  backgroundColor: activeCategory === cat ? "#1A1A1A" : "transparent",
+                  backgroundColor:
+                    activeCategory === cat ? "#1A1A1A" : "transparent",
                   color: activeCategory === cat ? "#F8F6F2" : "#6B7280",
-                  border: activeCategory === cat ? "1px solid #1A1A1A" : "1px solid #E5E7EB",
+                  border:
+                    activeCategory === cat
+                      ? "1px solid #1A1A1A"
+                      : "1px solid #E5E7EB",
                 }}
               >
                 {cat}
@@ -68,7 +76,12 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
           <button
             className="md:hidden flex items-center gap-2 text-muted-foreground"
             onClick={() => setFilterOpen(!filterOpen)}
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", letterSpacing: "0.08em", textTransform: "uppercase" }}
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "0.78rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
           >
             <SlidersHorizontal size={15} strokeWidth={1.5} />
             Filter
@@ -78,7 +91,11 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
           <div className="flex items-center gap-2">
             <span
               className="text-muted-foreground hidden md:inline"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.73rem", letterSpacing: "0.06em" }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.73rem",
+                letterSpacing: "0.06em",
+              }}
             >
               Sort:
             </span>
@@ -101,28 +118,42 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
             <div className="flex items-center justify-between mb-4">
               <span
                 className="text-foreground uppercase tracking-widest"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.7rem",
+                }}
               >
                 Categories
               </span>
               <button onClick={() => setFilterOpen(false)}>
-                <X size={16} strokeWidth={1.5} className="text-muted-foreground" />
+                <X
+                  size={16}
+                  strokeWidth={1.5}
+                  className="text-muted-foreground"
+                />
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => { setActiveCategory(cat); setFilterOpen(false); }}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    setFilterOpen(false);
+                  }}
                   className="px-4 py-1.5 transition-colors"
                   style={{
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "0.73rem",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    backgroundColor: activeCategory === cat ? "#1A1A1A" : "transparent",
+                    backgroundColor:
+                      activeCategory === cat ? "#1A1A1A" : "transparent",
                     color: activeCategory === cat ? "#F8F6F2" : "#6B7280",
-                    border: activeCategory === cat ? "1px solid #1A1A1A" : "1px solid #E5E7EB",
+                    border:
+                      activeCategory === cat
+                        ? "1px solid #1A1A1A"
+                        : "1px solid #E5E7EB",
                   }}
                 >
                   {cat}
