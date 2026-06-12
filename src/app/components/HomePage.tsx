@@ -1,11 +1,11 @@
 import { PRODUCTS } from "./store";
 import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
 import heroImage from "../../assets/images/heroImg.png";
 import Image from "../../assets/images/Versatile Style Power.jpg";
-import featuredImg from "../../assets/images/Collection.jpg"
-import featuredImg1 from "../../assets/images/Relaxed.png"
+import featuredImg from "../../assets/images/Collection.jpg";
+import featuredImg1 from "../../assets/images/Relaxed.png";
+import { FAQs } from "./FAQs";
 interface HomePageProps {
   onNavigate: (page: string, productId?: string) => void;
 }
@@ -16,9 +16,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
   return (
     <div className="bg-background min-h-screen">
       {/* HERO */}
-      <section
-        className="relative w-full overflow-hidden md:h-[133svh] h-[110svh] min-h-[600px] max-h-[1000px]"
-      >
+      <section className="relative w- full overflow-hidden md:h-[133svh] h-[110svh] min-h-[600px] max-h-[1000px]">
         <img
           src={heroImage}
           style={{ minHeight: "1000px" }}
@@ -69,7 +67,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </p>
             <button
               onClick={() => onNavigate("shop")}
-              className="px-9 py-3.5 bg-primary-foreground text-foreground hover:bg-accent transition-colors duration-300"
+              className="px-9 py-3.5 bg-primary-foreground text-foreground 
+              hover:bg-accent transition-colors duration-300 cursor-pointer"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.75rem",
@@ -121,7 +120,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             <button
               onClick={() => onNavigate("about")}
               className="text-foreground border-b border-foreground/30 pb-0.5 hover:border-accent 
-              hover:text-accent transition-colors duration-200"
+              hover:text-accent transition-colors duration-200 cursor-pointer"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.78rem",
@@ -133,7 +132,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </button>
           </div>
           <div className="relative">
-            <div className="overflow-hidden rounded-xl" style={{ minHeight: "400px", maxHeight: "500px" }}>
+            <div
+              className="overflow-hidden rounded-xl"
+              style={{ minHeight: "400px", maxHeight: "500px" }}
+            >
               <img
                 src={Image}
                 alt="Two women in minimal white — editorial"
@@ -185,7 +187,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
           <button
             onClick={() => onNavigate("shop")}
             className="hidden md:block text-foreground border-b border-foreground/30 
-            pb-0.5 hover:border-accent hover:text-accent transition-colors"
+            pb-0.5 hover:border-accent hover:text-accent transition-colors cursor-pointer"
             style={{
               fontFamily: "'Inter', sans-serif",
               fontSize: "0.75rem",
@@ -317,6 +319,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
+
+
       {/* BRAND PROMISE STRIP */}
       <section className="border-t border-b border-border py-10 mt-20">
         <div className="max-w-screen-xl mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
@@ -365,6 +369,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
+        <FAQs />
       </section>
 
       {/* NEWSLETTER */}
