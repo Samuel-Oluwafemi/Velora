@@ -27,7 +27,7 @@ export const FAQs = () => {
   ];
 
   return (
-    <div className="bg-background min-h-screen">
+    <div id="faqs" className="bg-background min-h-screen">
       <div className="pt-2 md:pt-1 pb-10 border-b border-border text-center px-3 md:px-12 max-w-screen-xl mx-auto">
         <h1
           className="text-foreground"
