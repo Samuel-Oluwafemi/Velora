@@ -36,8 +36,13 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         {/* Logo */}
         <button
           onClick={() => onNavigate("home")}
-          className="text-foreground tracking-[0.25em] uppercase"
-          style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.15rem", fontWeight: 500, letterSpacing: "0.3em" }}
+          className="text-foreground tracking-[0.25em] uppercase cursor-pointer "
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "1.15rem",
+            fontWeight: 500,
+            letterSpacing: "0.3em",
+          }}
         >
           VELORA
         </button>
@@ -48,8 +53,13 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
             <button
               key={link.page}
               onClick={() => onNavigate(link.page)}
-              className="text-foreground/80 hover:text-foreground transition-colors duration-200"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
+              className="text-foreground/80 hover:text-foreground transition-colors cursor-pointer duration-200 hover:text-white"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.78rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
             >
               {link.label}
             </button>
@@ -60,21 +70,25 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         <div className="flex items-center gap-5">
           <button
             onClick={() => onNavigate("account")}
-            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors"
+            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors hover:text-white cursor-pointer"
             aria-label="Account"
           >
             <User size={18} strokeWidth={1.5} />
           </button>
           <button
             onClick={() => onNavigate("cart")}
-            className="relative text-foreground/70 hover:text-foreground transition-colors"
+            className="relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer duration-200 hover:text-white"
             aria-label={`Cart (${cartCount} items)`}
           >
             <ShoppingBag size={18} strokeWidth={1.5} />
             {cartCount > 0 && (
               <span
                 className="absolute -top-2 -right-2 flex items-center justify-center w-4 h-4 rounded-full text-primary-foreground"
-                style={{ backgroundColor: "#C8B38E", fontSize: "0.6rem", fontFamily: "'Inter', sans-serif" }}
+                style={{
+                  backgroundColor: "#C8B38E",
+                  fontSize: "0.6rem",
+                  fontFamily: "'Inter', sans-serif",
+                }}
               >
                 {cartCount}
               </span>
@@ -86,7 +100,11 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
-            {menuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
+            {menuOpen ? (
+              <X size={20} strokeWidth={1.5} />
+            ) : (
+              <Menu size={20} strokeWidth={1.5} />
+            )}
           </button>
         </div>
       </div>
@@ -97,17 +115,33 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
           {navLinks.map((link) => (
             <button
               key={link.page}
-              onClick={() => { onNavigate(link.page); setMenuOpen(false); }}
+              onClick={() => {
+                onNavigate(link.page);
+                setMenuOpen(false);
+              }}
               className="text-left text-foreground/80 hover:text-foreground transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.85rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
             >
               {link.label}
             </button>
           ))}
           <button
-            onClick={() => { onNavigate("account"); setMenuOpen(false); }}
+            onClick={() => {
+              onNavigate("account");
+              setMenuOpen(false);
+            }}
             className="text-left text-foreground/80 hover:text-foreground transition-colors"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "0.85rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
           >
             Account
           </button>
