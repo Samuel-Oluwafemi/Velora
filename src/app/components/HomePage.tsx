@@ -76,7 +76,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 textTransform: "uppercase",
               }}
             >
-              Shop Collection
+              Explore Collection
             </button>
           </div>
         </div>
@@ -371,7 +371,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
+      <section  className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
         <FAQs />
       </section>
 
