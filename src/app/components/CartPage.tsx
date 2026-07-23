@@ -10,8 +10,16 @@ interface CartPageProps {
   onNavigate: (page: string, productId?: string) => void;
 }
 
-export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: CartPageProps) {
-  const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+export function CartPage({
+  cartItems,
+  onUpdateQuantity,
+  onRemove,
+  onNavigate,
+}: CartPageProps) {
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
   const shipping = subtotal > 300 ? 0 : 12;
   const total = subtotal + shipping;
 
@@ -27,20 +35,33 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
           </p>
           <h1
             className="text-foreground mb-4"
-            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem", fontWeight: 300 }}
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "2rem",
+              fontWeight: 300,
+            }}
           >
             Your bag is empty
           </h1>
           <p
             className="text-muted-foreground mb-10"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", fontWeight: 300 }}
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "0.85rem",
+              fontWeight: 300,
+            }}
           >
             Explore the collection and find something you love.
           </p>
           <button
             onClick={() => onNavigate("shop")}
             className="px-10 py-3.5 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground transition-colors duration-300"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase" }}
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "0.75rem",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+            }}
           >
             Browse Collection
           </button>
@@ -61,7 +82,11 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
         </p>
         <h1
           className="text-foreground mb-12"
-          style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 300 }}
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+            fontWeight: 300,
+          }}
         >
           Your Bag
         </h1>
@@ -94,14 +119,21 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                       <div>
                         <p
                           className="text-foreground mb-1 cursor-pointer hover:text-accent transition-colors"
-                          style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", fontWeight: 400 }}
+                          style={{
+                            fontFamily: "'Cormorant Garamond', serif",
+                            fontSize: "1.05rem",
+                            fontWeight: 400,
+                          }}
                           onClick={() => onNavigate("product", item.product.id)}
                         >
                           {item.product.name}
                         </p>
                         <p
                           className="text-muted-foreground"
-                          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem" }}
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: "0.75rem",
+                          }}
                         >
                           {item.product.category} · Size {item.size}
                         </p>
@@ -119,19 +151,34 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                       {/* Quantity */}
                       <div className="flex items-center border border-border">
                         <button
-                          onClick={() => onUpdateQuantity(item.product.id, item.size, item.quantity - 1)}
+                          onClick={() =>
+                            onUpdateQuantity(
+                              item.product.id,
+                              item.size,
+                              Math.max(1, item.quantity - 1),
+                            )
+                          }
                           className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                         >
                           <Minus size={12} strokeWidth={1.5} />
                         </button>
                         <span
                           className="w-8 text-center text-foreground"
-                          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: "0.8rem",
+                          }}
                         >
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => onUpdateQuantity(item.product.id, item.size, item.quantity + 1)}
+                          onClick={() =>
+                            onUpdateQuantity(
+                              item.product.id,
+                              item.size,
+                              item.quantity + 1,
+                            )
+                          }
                           className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                         >
                           <Plus size={12} strokeWidth={1.5} />
@@ -140,9 +187,13 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
 
                       <p
                         className="text-foreground"
-                        style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.9rem", fontWeight: 400 }}
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: "0.9rem",
+                          fontWeight: 400,
+                        }}
                       >
-                        €{(item.product.price * item.quantity).toLocaleString()}
+                        €{(item.product.price).toLocaleString()} * {item.quantity}
                       </p>
                     </div>
                   </div>
@@ -153,7 +204,14 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
             <button
               onClick={() => onNavigate("shop")}
               className="mt-8 text-muted-foreground hover:text-foreground transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "underline", textUnderlineOffset: "3px" }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.75rem",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
+              }}
             >
               Continue Shopping
             </button>
@@ -164,7 +222,11 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
             <div className="bg-secondary p-7 sticky top-24">
               <h2
                 className="text-foreground mb-7 pb-5 border-b border-border"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", fontWeight: 400 }}
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: "1.2rem",
+                  fontWeight: 400,
+                }}
               >
                 Order Summary
               </h2>
@@ -173,13 +235,19 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                 <div className="flex justify-between">
                   <span
                     className="text-muted-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                    }}
                   >
                     Subtotal
                   </span>
                   <span
                     className="text-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                    }}
                   >
                     €{subtotal.toLocaleString()}
                   </span>
@@ -187,13 +255,19 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                 <div className="flex justify-between">
                   <span
                     className="text-muted-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                    }}
                   >
                     Shipping
                   </span>
                   <span
                     className="text-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                    }}
                   >
                     {shipping === 0 ? "Free" : `€${shipping}`}
                   </span>
@@ -201,7 +275,10 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                 {shipping > 0 && (
                   <p
                     className="text-muted-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.72rem",
+                    }}
                   >
                     Free shipping on orders over €300
                   </p>
@@ -212,20 +289,31 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
                 <div className="flex justify-between">
                   <span
                     className="text-foreground"
-                    style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", fontWeight: 400 }}
+                    style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: "1.05rem",
+                      fontWeight: 400,
+                    }}
                   >
                     Total
                   </span>
                   <span
                     className="text-foreground"
-                    style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", fontWeight: 400 }}
+                    style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: "1.05rem",
+                      fontWeight: 400,
+                    }}
                   >
                     €{total.toLocaleString()}
                   </span>
                 </div>
                 <p
                   className="text-muted-foreground mt-1"
-                  style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.72rem",
+                  }}
                 >
                   Including VAT
                 </p>
@@ -234,21 +322,31 @@ export function CartPage({ cartItems, onUpdateQuantity, onRemove, onNavigate }: 
               <button
                 onClick={() => onNavigate("checkout")}
                 className="w-full py-4 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground transition-colors duration-300"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem", letterSpacing: "0.15em", textTransform: "uppercase" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
               >
                 Proceed to Checkout
               </button>
 
               <div className="mt-5 flex flex-col gap-2">
-                {["Secure checkout", "Easy returns within 30 days"].map((note) => (
-                  <p
-                    key={note}
-                    className="text-muted-foreground text-center"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
-                  >
-                    ✓ {note}
-                  </p>
-                ))}
+                {["Secure checkout", "Easy returns within 30 days"].map(
+                  (note) => (
+                    <p
+                      key={note}
+                      className="text-muted-foreground text-center"
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: "0.72rem",
+                      }}
+                    >
+                      ✓ {note}
+                    </p>
+                  ),
+                )}
               </div>
             </div>
           </div>

@@ -11,7 +11,11 @@ interface ProductDetailPageProps {
   onAddToCart: (item: CartItem) => void;
 }
 
-export function ProductDetailPage({ productId, onNavigate, onAddToCart }: ProductDetailPageProps) {
+export function ProductDetailPage({
+  productId,
+  onNavigate,
+  onAddToCart,
+}: ProductDetailPageProps) {
   const product = PRODUCTS.find((p) => p.id === productId) || PRODUCTS[0];
   const [selectedSize, setSelectedSize] = useState("");
   const [activeImage, setActiveImage] = useState(0);
@@ -19,11 +23,19 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
 
-  const related = PRODUCTS.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
-  const fallbackRelated = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
+  const related = PRODUCTS.filter(
+    (p) => p.id !== product.id && p.category === product.category,
+  ).slice(0, 3);
+  const fallbackRelated = PRODUCTS.filter((p) => p.id !== product.id).slice(
+    0,
+    3,
+  );
 
   const handleAdd = () => {
-    if (!selectedSize) { setSizeError(true); return; }
+    if (!selectedSize) {
+      setSizeError(true);
+      return;
+    }
     setSizeError(false);
     onAddToCart({ product, size: selectedSize, quantity });
     setAdded(true);
@@ -37,7 +49,12 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
         <button
           onClick={() => onNavigate("shop")}
           className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors mb-8"
-          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", letterSpacing: "0.06em", textTransform: "uppercase" }}
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "0.75rem",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+          }}
         >
           <ChevronLeft size={14} strokeWidth={1.5} />
           Shop
@@ -56,7 +73,10 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
                   className="overflow-hidden"
                   style={{
                     aspectRatio: "3/4",
-                    border: activeImage === i ? "1px solid #1A1A1A" : "1px solid #E5E7EB",
+                    border:
+                      activeImage === i
+                        ? "1px solid #1A1A1A"
+                        : "1px solid #E5E7EB",
                   }}
                 >
                   <ImageWithFallback
@@ -68,7 +88,10 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
               ))}
             </div>
             {/* Main image */}
-            <div className="flex-1 overflow-hidden bg-secondary" style={{ aspectRatio: "3/4" }}>
+            <div
+              className="flex-1 overflow-hidden bg-secondary"
+              style={{ aspectRatio: "3/4" }}
+            >
               <ImageWithFallback
                 src={product.images[activeImage]}
                 alt={product.name}
@@ -82,7 +105,12 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
             {product.tag && (
               <span
                 className="self-start px-3 py-1 mb-4 bg-foreground text-primary-foreground"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.65rem",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
               >
                 {product.tag}
               </span>
@@ -96,13 +124,22 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
             </p>
             <h1
               className="text-foreground mb-3"
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.8rem, 2.5vw, 2.5rem)", fontWeight: 300 }}
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "clamp(1.8rem, 2.5vw, 2.5rem)",
+                fontWeight: 300,
+              }}
             >
               {product.name}
             </h1>
             <p
               className="text-foreground mb-8"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "1.05rem", fontWeight: 300, letterSpacing: "0.04em" }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "1.05rem",
+                fontWeight: 300,
+                letterSpacing: "0.04em",
+              }}
             >
               €{product.price}
             </p>
@@ -110,7 +147,11 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
             {/* Description */}
             <p
               className="text-muted-foreground leading-relaxed mb-8"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem", fontWeight: 300 }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.85rem",
+                fontWeight: 300,
+              }}
             >
               {product.description}
             </p>
@@ -121,13 +162,20 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
                 <div className="flex items-center justify-between mb-3">
                   <p
                     className="text-foreground uppercase tracking-widest"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.7rem",
+                    }}
                   >
                     Size
                   </p>
                   <button
                     className="text-muted-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", textDecoration: "underline" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.7rem",
+                      textDecoration: "underline",
+                    }}
                   >
                     Size Guide
                   </button>
@@ -136,19 +184,24 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
                   {product.sizes.map((size) => (
                     <button
                       key={size}
-                      onClick={() => { setSelectedSize(size); setSizeError(false); }}
+                      onClick={() => {
+                        setSelectedSize(size);
+                        setSizeError(false);
+                      }}
                       className="w-12 h-10 transition-colors duration-200"
                       style={{
                         fontFamily: "'Inter', sans-serif",
                         fontSize: "0.75rem",
                         letterSpacing: "0.04em",
-                        backgroundColor: selectedSize === size ? "#1A1A1A" : "transparent",
+                        backgroundColor:
+                          selectedSize === size ? "#1A1A1A" : "transparent",
                         color: selectedSize === size ? "#F8F6F2" : "#1A1A1A",
-                        border: sizeError && !selectedSize
-                          ? "1px solid #c0392b"
-                          : selectedSize === size
-                            ? "1px solid #1A1A1A"
-                            : "1px solid #E5E7EB",
+                        border:
+                          sizeError && !selectedSize
+                            ? "1px solid #c0392b"
+                            : selectedSize === size
+                              ? "1px solid #1A1A1A"
+                              : "1px solid #E5E7EB",
                       }}
                     >
                       {size}
@@ -156,7 +209,13 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
                   ))}
                 </div>
                 {sizeError && (
-                  <p className="text-destructive mt-2" style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.75rem" }}>
+                  <p
+                    className="text-destructive mt-2"
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.75rem",
+                    }}
+                  >
                     Please select a size.
                   </p>
                 )}
@@ -166,7 +225,10 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
               <div className="flex items-center gap-4 mb-6">
                 <p
                   className="text-foreground uppercase tracking-widest"
-                  style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: "0.7rem",
+                  }}
                 >
                   Qty
                 </p>
@@ -179,7 +241,10 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
                   </button>
                   <span
                     className="w-9 text-center text-foreground"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                    }}
                   >
                     {quantity}
                   </span>
@@ -194,6 +259,7 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
 
               {/* Add to Cart */}
               <button
+                disabled={added}
                 onClick={handleAdd}
                 className="w-full py-4 transition-colors duration-300"
                 style={{
@@ -213,13 +279,20 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
             <div className="border-t border-border pt-6">
               <p
                 className="text-muted-foreground uppercase tracking-widest mb-2"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.68rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.68rem",
+                }}
               >
                 Material
               </p>
               <p
                 className="text-foreground"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem", fontWeight: 300 }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.82rem",
+                  fontWeight: 300,
+                }}
               >
                 {product.material}
               </p>
@@ -232,7 +305,11 @@ export function ProductDetailPage({ productId, onNavigate, onAddToCart }: Produc
           <div className="border-t border-border pt-14 pb-20">
             <h2
               className="text-foreground mb-10"
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.6rem", fontWeight: 300 }}
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "1.6rem",
+                fontWeight: 300,
+              }}
             >
               You May Also Like
             </h2>
