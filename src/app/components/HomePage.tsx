@@ -252,7 +252,9 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </p>
               <button
                 onClick={() => onNavigate("shop")}
-                className="self-start px-6 py-2.5 border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-foreground transition-colors duration-300"
+                className="self-start px-6 py-2.5 border border-primary-foreground 
+                text-primary-foreground hover:bg-primary-foreground hover:text-foreground 
+                transition-colors duration-300"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "0.7rem",
@@ -304,7 +306,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </p>
               <button
                 onClick={() => onNavigate("shop")}
-                className="self-start px-6 py-2.5 border border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-foreground transition-colors duration-300"
+                className="self-start px-6 py-2.5 border border-primary-foreground text-primary-foreground 
+                hover:bg-primary-foreground hover:text-foreground transition-colors duration-300"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "0.7rem",
@@ -319,11 +322,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-
-
       {/* BRAND PROMISE STRIP */}
       <section className="border-t border-b border-border py-10 mt-20">
-        <div className="max-w-screen-xl mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div
+          className="max-w-screen-xl mx-auto px-6 md:px-12 grid grid-cols-2 
+        md:grid-cols-4 gap-8 text-center"
+        >
           {[
             {
               icon: "✦",
@@ -371,7 +375,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      <section  className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
+      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
         <FAQs />
       </section>
 
@@ -410,12 +414,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
           <input
             type="email"
             placeholder="Your email address"
-            className="flex-1 px-5 py-3.5 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors"
+            className="flex-1 px-5 py-3.5 border border-border bg-background text-foreground 
+            placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors"
             style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
           />
           <button
             type="submit"
-            className="px-7 py-3.5 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground transition-colors duration-300"
+            className="px-7 py-3.5 bg-foreground text-primary-foreground hover:bg-accent 
+            hover:text-foreground transition-colors duration-300"
             style={{
               fontFamily: "'Inter', sans-serif",
               fontSize: "0.75rem",

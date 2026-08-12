@@ -11,13 +11,21 @@ export function Footer({ onNavigate }: FooterProps) {
           <div className="md:col-span-1">
             <p
               className="tracking-[0.3em] uppercase mb-4 text-primary-foreground"
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", fontWeight: 500 }}
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "1.1rem",
+                fontWeight: 500,
+              }}
             >
               VELORA
             </p>
             <p
               className="text-primary-foreground/50 leading-relaxed"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem", maxWidth: "18ch" }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.8rem",
+                maxWidth: "18ch",
+              }}
             >
               Designed with intention. Made to last.
             </p>
@@ -31,12 +39,21 @@ export function Footer({ onNavigate }: FooterProps) {
             >
               Shop
             </p>
-            {["New Arrivals", "All Products", "Outerwear", "Knitwear", "Dresses"].map((item) => (
+            {[
+              "New Arrivals",
+              "All Products",
+              "Outerwear",
+              "Knitwear",
+              "Dresses",
+            ].map((item) => (
               <button
                 key={item}
                 onClick={() => onNavigate("shop")}
                 className="block text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-2.5"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.8rem",
+                }}
               >
                 {item}
               </button>
@@ -56,7 +73,10 @@ export function Footer({ onNavigate }: FooterProps) {
                 key={item}
                 onClick={() => onNavigate("about")}
                 className="block text-primary-foreground/70 hover:text-primary-foreground transition-colors mb-2.5"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.8rem",
+                }}
               >
                 {item}
               </button>
@@ -71,11 +91,19 @@ export function Footer({ onNavigate }: FooterProps) {
             >
               Support
             </p>
-            {["Shipping & Returns", "Size Guide", "Care Instructions", "Contact"].map((item) => (
+            {[
+              "Shipping & Returns",
+              "Size Guide",
+              "Care Instructions",
+              "Contact",
+            ].map((item) => (
               <p
                 key={item}
                 className="block text-primary-foreground/70 mb-2.5"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.8rem",
+                }}
               >
                 {item}
               </p>
@@ -83,7 +111,10 @@ export function Footer({ onNavigate }: FooterProps) {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <div
+          className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row 
+        justify-between items-start md:items-center gap-3"
+        >
           <p
             className="text-primary-foreground/30"
             style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
@@ -95,7 +126,10 @@ export function Footer({ onNavigate }: FooterProps) {
               <p
                 key={item}
                 className="text-primary-foreground/30"
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.72rem",
+                }}
               >
                 {item}
               </p>

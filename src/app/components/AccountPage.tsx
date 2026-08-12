@@ -1,6 +1,28 @@
-export function AccountPage({ onNavigate }: { onNavigate: (p: string) => void }) {
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import SignInForm from "./auth/SignInForm";
+import SignUpForm from "./auth/SignUpForm";
+import ForgotPasswordForm from "./auth/ForgotPasswordForm";
+import AccountDashboard from "./auth/AccountDashboard";
+
+export function AccountPage({
+  onNavigate,
+}: {
+  onNavigate: (p: string) => void;
+}) {
+  const { user, loading } = useAuth();
+  const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
+
+  if (loading) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <p>Loading…</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-20">
+    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-20 pb-10">
       <div className="w-full max-w-sm">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-2 text-center"
@@ -16,72 +38,34 @@ export function AccountPage({ onNavigate }: { onNavigate: (p: string) => void })
             fontWeight: 300,
           }}
         >
-          Sign In
+          {user
+            ? "My Account"
+            : view === "signup"
+              ? "Create Account"
+              : view === "forgot"
+                ? "Reset Password"
+                : "Sign In"}
         </h1>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+
+        {user ? (
+          <AccountDashboard />
+        ) : (
           <div>
-            <label
-              className="block text-muted-foreground mb-2"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.7rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="w-full px-4 py-3 border border-border bg-background text-foreground 
-              placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem" }}
-            />
+            {view === "signin" && (
+              <SignInForm
+                onSwitch={setView}
+                onSuccess={() => onNavigate("home")}
+              />
+            )}
+            {view === "signup" && (
+              <SignUpForm
+                onSwitch={setView}
+                onSuccess={() => onNavigate("home")}
+              />
+            )}
+            {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
           </div>
-          <div>
-            <label
-              className="block text-muted-foreground mb-2"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.7rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-3 border border-border bg-background text-foreground 
-              placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem" }}
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-3.5 bg-foreground text-primary-foreground hover:bg-accent
-             hover:text-foreground transition-colors duration-300 mt-2"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "0.75rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-            }}
-          >
-            Sign In
-          </button>
-        </form>
-        <p
-          className="text-muted-foreground text-center mt-6"
-          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
-        >
-          New to VELORA?{" "}
-          <button className="text-foreground underline underline-offset-2">
-            Create account
-          </button>
-        </p>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,12 @@
 import { useState, useEffect } from "react";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { CartItem } from "./components/store";
 import { Navbar } from "./components/Navbar";
 import { FAQs } from "./components/FAQs";
@@ -12,33 +20,29 @@ import { Footer } from "./components/Footer";
 import { AccountPage } from "./components/AccountPage";
 import featuredImg1 from "../assets/images/Relaxed.png";
 
-type Page =
-  | "home"
-  | "shop"
-  | "collection"
-  | "about"
-  | "product"
-  | "cart"
-  | "checkout"
-  | "account"
-  | "admin";
-
 export default function App() {
-  {
-    /* MARKER-MAKE-KIT-INVOKED */
-  }
-
-  const [page, setPage] = useState<Page>("home");
-  const [productId, setProductId] = useState<string>("");
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [page, productId]);
+  }, []);
 
-  const navigate = (p: string, pid?: string) => {
-    setPage(p as Page);
-    if (pid) setProductId(pid);
+  const navigateToPage = (p: string, pid?: string) => {
+    const pageMap: Record<string, string> = {
+      home: "/",
+      shop: "/shop",
+      collection: "/shop",
+      about: "/about",
+      account: "/account",
+      cart: "/cart",
+      checkout: "/checkout",
+      admin: "/admin",
+      product: pid ? `/product/${pid}` : "/shop",
+    };
+
+    const target = pageMap[p] ?? "/";
+    navigate(target);
   };
 
   const addToCart = (item: CartItem) => {
@@ -79,56 +83,58 @@ export default function App() {
 
   const cartCount = cartItems.reduce((s, i) => s + i.quantity, 0);
 
-  if (page === "admin") {
-    return (
-      <div
-        className="bg-background text-foreground"
-        style={{ fontFamily: "'Inter', sans-serif" }}
-      >
-        <AdminDashboard onNavigate={navigate} />
-      </div>
-    );
-  }
-
   return (
     <div
       className="bg-background text-foreground"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
-      <Navbar cartCount={cartCount} onNavigate={navigate} currentPage={page} />
+      <Routes>
+        <Route
+          path="/"
+          element={<PageLayout cartCount={cartCount} onNavigate={navigateToPage} page="home" />}
+        >
+          <Route index element={<HomePage onNavigate={navigateToPage} />} />
+          <Route path="shop" element={<ShopPage onNavigate={navigateToPage} />} />
+          <Route path="collection" element={<ShopPage onNavigate={navigateToPage} />} />
+          <Route path="about" element={<AboutPage onNavigate={navigateToPage} />} />
+          <Route path="account" element={<AccountPage onNavigate={navigateToPage} />} />
+          <Route
+            path="cart"
+            element={
+              <CartPage
+                cartItems={cartItems}
+                onUpdateQuantity={updateQuantity}
+                onRemove={removeItem}
+                onNavigate={navigateToPage}
+              />
+            }
+          />
+          <Route
+            path="checkout"
+            element={
+              <CheckoutPage
+                cartItems={cartItems}
+                onNavigate={navigateToPage}
+                onOrderComplete={() => setCartItems([])}
+              />
+            }
+          />
+          <Route
+            path="product/:productId"
+            element={
+              <ProductDetailRoute
+                onNavigate={navigateToPage}
+                onAddToCart={addToCart}
+              />
+            }
+          />
+          <Route path="admin" element={<AdminDashboard onNavigate={navigateToPage} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
 
-      {page === "home" && <HomePage onNavigate={navigate} />}
-      {(page === "shop" || page === "collection") && (
-        <ShopPage onNavigate={navigate} />
-      )}
-      {page === "product" && productId && (
-        <ProductDetailPage
-          productId={productId}
-          onNavigate={navigate}
-          onAddToCart={addToCart}
-        />
-      )}
-      {page === "cart" && (
-        <CartPage
-          cartItems={cartItems}
-          onUpdateQuantity={updateQuantity}
-          onRemove={removeItem}
-          onNavigate={navigate}
-        />
-      )}
-      {page === "checkout" && (
-        <CheckoutPage
-          cartItems={cartItems}
-          onNavigate={navigate}
-          onOrderComplete={() => setCartItems([])}
-        />
-      )}
-      {page === "about" && <AboutPage onNavigate={navigate} />}
-      {page === "account" && <AccountPage onNavigate={navigate} />}
-
-      {/* Demo: Admin Panel shortcut */}
       <button
-        onClick={() => navigate("admin")}
+        onClick={() => navigateToPage("admin")}
         className="fixed bottom-5 right-5 z-50 px-4 py-2 bg-foreground text-primary-foreground 
         hover:bg-accent hover:text-foreground transition-colors duration-200"
         style={{
@@ -141,6 +147,45 @@ export default function App() {
         Admin →
       </button>
     </div>
+  );
+}
+
+function PageLayout({
+  cartCount,
+  onNavigate,
+  page,
+}: {
+  cartCount: number;
+  onNavigate: (p: string, pid?: string) => void;
+  page: string;
+}) {
+  return (
+    <>
+      <Navbar cartCount={cartCount} onNavigate={onNavigate} currentPage={page} />
+      <Outlet />
+    </>
+  );
+}
+
+function ProductDetailRoute({
+  onNavigate,
+  onAddToCart,
+}: {
+  onNavigate: (p: string, pid?: string) => void;
+  onAddToCart: (item: CartItem) => void;
+}) {
+  const { productId } = useParams();
+
+  if (!productId) {
+    return <Navigate to="/shop" replace />;
+  }
+
+  return (
+    <ProductDetailPage
+      productId={productId}
+      onNavigate={onNavigate}
+      onAddToCart={onAddToCart}
+    />
   );
 }
 
@@ -230,12 +275,9 @@ function AboutPage({ onNavigate }: { onNavigate: (p: string) => void }) {
           Shop the Collection
         </button>
       </div>
-      {/* FAQs */}
       <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-6 md:py-20">
         <FAQs />
       </section>
-
-      {/* Footer */}
       <Footer onNavigate={onNavigate} />
     </div>
   );
