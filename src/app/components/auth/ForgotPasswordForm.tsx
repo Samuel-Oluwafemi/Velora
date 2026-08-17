@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
+import { Loader, FileWarning } from "lucide-react";
 
 export default function ForgotPasswordForm({
   onSwitch,
 }: {
   onSwitch: (view: "signin" | "signup" | "forgot") => void;
 }) {
-  const { resetPassword, loading } = useAuth();
+  const { resetPassword, actionLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -43,11 +44,19 @@ export default function ForgotPasswordForm({
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={actionLoading}
         className="w-full py-3.5 bg-foreground text-primary-foreground hover:bg-black focus:outline-none 
-        focus:ring-2 focus:ring-black focus:ring-offset-2 transition duration-200 cursor-pointer"
+        focus:ring-2 focus:ring-black focus:ring-offset-2 transition duration-200 cursor-pointer
+        disabled:bg-gray-400 disabled:cursor-not-allowed flex justify-center gap-2 items-center"
       >
-        {loading ? "Sending..." : "Send reset email"}
+        {actionLoading ? (
+          <>
+            <Loader size={18} className="animate-spin" />
+            <span>Sending...</span>
+          </>
+        ) : (
+          "Send reset email"
+        )}
       </button>
 
       {/* Back to sign in */}
@@ -59,6 +68,14 @@ export default function ForgotPasswordForm({
         >
           Back to Sign In
         </button>
+      </div>
+
+      {/* Footer */}
+      <div className="flex text-center justify-center mt-4 gap-1">
+        <FileWarning className="text-purple-600" size={15} />
+        <p className="text-center text-gray-600 text-xs">
+          Protected admin access only
+        </p>
       </div>
     </form>
   );
