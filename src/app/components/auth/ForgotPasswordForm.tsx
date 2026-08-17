@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 
-export default function ForgotPasswordForm({ onSwitch }: { onSwitch: (view: "signin" | "signup" | "forgot") => void }) {
+export default function ForgotPasswordForm({
+  onSwitch,
+}: {
+  onSwitch: (view: "signin" | "signup" | "forgot") => void;
+}) {
   const { resetPassword, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -23,6 +27,7 @@ export default function ForgotPasswordForm({ onSwitch }: { onSwitch: (view: "sig
     <form onSubmit={handleSubmit} className="space-y-4">
       {message && <div className="text-sm text-green-600">{message}</div>}
       {localError && <div className="text-sm text-red-600">{localError}</div>}
+      {/* Email */}
       <div>
         <label className="block text-muted-foreground mb-2">Email</label>
         <input
@@ -30,15 +35,28 @@ export default function ForgotPasswordForm({ onSwitch }: { onSwitch: (view: "sig
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          placeholder="you@example.com"
           className="w-full px-4 py-3 border border-border bg-background text-foreground"
         />
       </div>
-      <button type="submit" disabled={loading} className="w-full py-3.5 bg-foreground text-primary-foreground">
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3.5 bg-foreground text-primary-foreground hover:bg-black focus:outline-none 
+        focus:ring-2 focus:ring-black focus:ring-offset-2 transition duration-200 cursor-pointer"
+      >
         {loading ? "Sending..." : "Send reset email"}
       </button>
 
+      {/* Back to sign in */}
       <div className="mt-4 text-center text-sm">
-        <button type="button" onClick={() => onSwitch("signin")} className="underline">
+        <button
+          type="button"
+          onClick={() => onSwitch("signin")}
+          className="underline hover:text-blue-700 cursor-pointer"
+        >
           Back to Sign In
         </button>
       </div>
