@@ -22,7 +22,7 @@ export function AccountPage({
   }
 
   return (
-    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-10 md:pt-20 pb-10">
+    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-5 md:pt-20 pb-2 md:pb-10">
       <div className="w-full max-w-sm">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-2 text-center"
