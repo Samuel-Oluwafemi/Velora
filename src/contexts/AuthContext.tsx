@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
@@ -15,7 +16,9 @@ import {
   signOut,
   type User as FirebaseUser,
 } from "firebase/auth";
-import { auth } from "../app/firebase";
+
+import { auth, db } from "../app/firebase"; // auth talks to firebase auth, db talks to Firestore
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 interface AuthUser {
   uid: string;
@@ -25,12 +28,22 @@ interface AuthUser {
 
 interface AuthContextType {
   user: AuthUser | null;
+  // Firebase's initial auth check
   loading: boolean;
+  // Individual operations
+  signupLoading: boolean;
+  loginLoading: boolean;
+  resetPasswordLoading: boolean;
   error: string | null;
+
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
+
+  signup: (name: string, email: string, password: string) => Promise<void>;
+
   logout: () => Promise<void>;
+
   resetPassword: (email: string) => Promise<void>;
+
   clearError: () => void;
 }
 
@@ -39,6 +52,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [signupLoading, setSignupLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,44 +64,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser: FirebaseUser | null) => {
-      if (currentUser) {
-        setUser({
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (currentUser: FirebaseUser | null) => {
+        if (currentUser) {
+          setUser({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+          });
+        } else {
+          setUser(null);
+        }
+
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, []);
 
   async function login(email: string, password: string) {
     setError(null);
+    setLoginLoading(true);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign in");
       throw err;
+    } finally {
+      setLoginLoading(false);
     }
   }
 
-  async function signup(email: string, password: string) {
+  async function signup(name: string, email: string, password: string) {
     setError(null);
+    setSignupLoading(true);
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        name,
+        email,
+        role: "customer",
+        createdAt: serverTimestamp(),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create account");
+
       throw err;
+    } finally {
+      setSignupLoading(false);
     }
   }
 
   async function logout() {
     setError(null);
+
     try {
       await signOut(auth);
     } catch (err) {
@@ -96,11 +137,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function resetPassword(email: string) {
     setError(null);
+    setResetPasswordLoading(true);
+
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send reset email");
+      setError(
+        err instanceof Error ? err.message : "Failed to send reset email",
+      );
+
       throw err;
+    } finally {
+      setResetPasswordLoading(false);
     }
   }
 
@@ -113,6 +161,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         loading,
+        signupLoading,
+        loginLoading,
+        resetPasswordLoading,
         error,
         login,
         signup,
@@ -128,8 +179,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }
