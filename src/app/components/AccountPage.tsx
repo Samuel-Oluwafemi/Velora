@@ -10,7 +10,7 @@ export function AccountPage({
 }: {
   onNavigate: (p: string) => void;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth(); 
   const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
 
   if (loading) {
@@ -22,7 +22,7 @@ export function AccountPage({
   }
 
   return (
-    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-20 pb-10">
+    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-10 md:pt-20 pb-10">
       <div className="w-full max-w-sm">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-2 text-center"
@@ -54,13 +54,11 @@ export function AccountPage({
             {view === "signin" && (
               <SignInForm
                 onSwitch={setView}
-                onSuccess={() => onNavigate("home")}
               />
             )}
             {view === "signup" && (
               <SignUpForm
                 onSwitch={setView}
-                onSuccess={() => onNavigate("home")}
               />
             )}
             {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
