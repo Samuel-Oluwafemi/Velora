@@ -9,7 +9,7 @@ export default function SignInForm({
   onSwitch: (view: "signin" | "signup" | "forgot") => void;
   onSuccess?: () => void;
 }) {
-  const { login, actionLoading } = useAuth();
+  const {login, loginLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function SignInForm({
         />
       </div>
 
-      {/* Password */}
+        {/* Password */}
       <div>
         <label className="block text-muted-foreground mb-2">Password</label>
         <input
@@ -68,19 +68,19 @@ export default function SignInForm({
         {/* Submit */}
         <button
           type="submit"
-          disabled={actionLoading}
+          disabled={loginLoading}
           className="w-full py-3.5 bg-foreground text-primary-foreground cursor-pointer 
           hover:bg-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2
             transition duration-200 flex justify-center gap-2 items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {actionLoading ? (
-            <>
-              <Loader size={18} className="animate-spin" />
-              <span>Signing in...</span>
-            </>
-          ) : (
-            "Sign In"
-          )}
+          {loginLoading ? (
+                    <>
+                      <Loader size={18} className="animate-spin" />
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
         </button>
 
         {/* Create account */}
