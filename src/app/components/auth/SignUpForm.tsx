@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { Loader, FileWarning } from "lucide-react";
+import { Loader} from "lucide-react";
 
 export default function SignUpForm({
   onSwitch,
@@ -9,7 +9,7 @@ export default function SignUpForm({
   onSwitch: (view: "signin" | "signup" | "forgot") => void;
   onSuccess?: () => void;
 }) {
-  const { signup, actionLoading } = useAuth();
+  const { signup, signupLoading } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,12 +96,12 @@ export default function SignUpForm({
       {/* Submit */}
       <button
         type="submit"
-        disabled={actionLoading}
+        disabled={signupLoading}
         className="w-full py-3.5 flex justify-center gap-2 items-center bg-foreground curosr-pointer 
         text-primary-foreground cursor-pointer hover:bg-black focus:outline-none focus:ring-2 
         focus:ring-black focus:ring-offset-2 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {actionLoading ? (
+        {signupLoading ? (
           <>
             <Loader size={18} className="animate-spin" />
             <span>Creating Account...</span>
