@@ -7,6 +7,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { CartItem } from "./components/store";
 import { Navbar } from "./components/Navbar";
 import { FAQs } from "./components/FAQs";
@@ -22,6 +23,25 @@ import featuredImg1 from "../assets/images/Relaxed.png";
 
 export default function App() {
   const navigate = useNavigate();
+  // Get the current user from the authentication context
+  const {user} = useAuth();
+
+  // checkout handler checks if the cart is empty or if the user is not logged in. If the cart is empty, it does nothing. If the user is not logged in, it navigates to the account page. Otherwise, it navigates to the checkout page.
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      return;
+    }
+
+    // navigate to the account page if the user is not logged in
+    if(!user) {
+      navigate("/account");
+      return;
+    }
+
+    // navigate to the checkout page if the user is logged in
+    navigate("/checkout");
+  };
+
   // Initialize cart items from localStorage
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem("velora-cart");
@@ -147,6 +167,7 @@ export default function App() {
                 onUpdateQuantity={updateQuantity}
                 onRemove={removeItem}
                 onNavigate={navigateToPage}
+                onCheckout={handleCheckout}
               />
             }
           />
