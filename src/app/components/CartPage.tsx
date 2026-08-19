@@ -55,7 +55,8 @@ export function CartPage({
           </p>
           <button
             onClick={() => onNavigate("shop")}
-            className="px-10 py-3.5 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground transition-colors duration-300"
+            className="px-10 py-3.5 bg-foreground text-primary-foreground hover:bg-accent 
+            hover:text-foreground transition-colors duration-300"
             style={{
               fontFamily: "'Inter', sans-serif",
               fontSize: "0.75rem",
