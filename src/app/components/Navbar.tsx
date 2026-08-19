@@ -53,7 +53,8 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
             <button
               key={link.page}
               onClick={() => onNavigate(link.page)}
-              className="text-foreground/80 hover:text-foreground transition-colors cursor-pointer duration-200 hover:text-white"
+              className="text-foreground/80 hover:text-foreground transition-colors cursor-pointer 
+              duration-200 hover:text-yellow-800/60"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.78rem",
@@ -70,14 +71,18 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         <div className="flex items-center gap-5">
           <button
             onClick={() => onNavigate("account")}
-            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors hover:text-white cursor-pointer"
+            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors 
+            cursor-pointer hover:text-yellow-800/60"
             aria-label="Account"
           >
             <User size={18} strokeWidth={1.5} />
           </button>
+
+          {/* Cart */}
           <button
             onClick={() => onNavigate("cart")}
-            className="relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer duration-200 hover:text-white"
+            className="relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer 
+            duration-200 hover:text-yellow-800/60"
             aria-label={`Cart (${cartCount} items)`}
           >
             <ShoppingBag size={18} strokeWidth={1.5} />
