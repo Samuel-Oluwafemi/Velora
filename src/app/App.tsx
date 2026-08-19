@@ -40,11 +40,12 @@ export default function App() {
   // Persist cart items to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("velora-cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+  }, [cartItems]); 
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  })
   // navigateToPage handles navigation to different pages in the app. It uses a mapping of page names to their corresponding routes. If a product ID is provided, it constructs the route for the product detail page.
   const navigateToPage = (p: string, pid?: string) => {
     const pageMap: Record<string, string> = {
