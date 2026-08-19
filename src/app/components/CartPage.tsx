@@ -118,6 +118,7 @@ export function CartPage({
                   <div className="flex-1 flex flex-col justify-between">
                     <div className="flex justify-between gap-3">
                       <div>
+                      {/* Id */}
                         <p
                           className="text-foreground mb-1 cursor-pointer hover:text-accent transition-colors"
                           style={{
@@ -129,6 +130,7 @@ export function CartPage({
                         >
                           {item.product.name}
                         </p>
+                        {/* Description */}
                         <p
                           className="text-muted-foreground"
                           style={{
@@ -194,7 +196,7 @@ export function CartPage({
                           fontWeight: 400,
                         }}
                       >
-                        €{(item.product.price).toLocaleString()} * {item.quantity}
+                        €{(item.product.price * item.quantity).toLocaleString()} 
                       </p>
                     </div>
                   </div>
