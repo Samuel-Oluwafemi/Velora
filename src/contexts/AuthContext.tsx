@@ -26,6 +26,7 @@ interface AuthUser {
   displayName: string | null;
 }
 
+// AuthContextType defines the shape of the authentication context, including the current user, loading states for various operations, and methods for login, signup, logout, and password reset. It also includes an error state to handle any issues that arise during authentication processes.
 interface AuthContextType {
   user: AuthUser | null;
   // Firebase's initial auth check
@@ -47,6 +48,7 @@ interface AuthContextType {
   clearError: () => void;
 }
 
+// AuthContext provides authentication state and methods to the rest of the app. It manages user state, loading states for various auth operations, and error handling. It uses Firebase Authentication for user management and Firestore for storing additional user data.
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
