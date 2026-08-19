@@ -22,12 +22,30 @@ import featuredImg1 from "../assets/images/Relaxed.png";
 
 export default function App() {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  // Initialize cart items from localStorage
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem("velora-cart");
+
+    // If there's no saved cart, return an empty array. If there is, try to parse it as JSON. If parsing fails, also return an empty array.
+    if (!savedCart) {
+      return [];
+    }
+    try {
+      return JSON.parse(savedCart) as CartItem[];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist cart items to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("velora-cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
+  });
+  // navigateToPage handles navigation to different pages in the app. It uses a mapping of page names to their corresponding routes. If a product ID is provided, it constructs the route for the product detail page.
   const navigateToPage = (p: string, pid?: string) => {
     const pageMap: Record<string, string> = {
       home: "/",
@@ -45,6 +63,7 @@ export default function App() {
     navigate(target);
   };
 
+  // Cart management functions for adding, updating, and removing items
   const addToCart = (item: CartItem) => {
     setCartItems((prev) => {
       const existing = prev.find(
@@ -61,6 +80,7 @@ export default function App() {
     });
   };
 
+  // updateQuantity updates the quantity of a specific item in the cart. If the new quantity is less than or equal to zero, it removes the item from the cart.
   const updateQuantity = (productId: string, size: string, qty: number) => {
     if (qty <= 0) {
       removeItem(productId, size);
@@ -75,12 +95,14 @@ export default function App() {
     );
   };
 
+  // removeItem removes a specific item from the cart based on its product ID and size.
   const removeItem = (productId: string, size: string) => {
     setCartItems((prev) =>
       prev.filter((i) => !(i.product.id === productId && i.size === size)),
     );
   };
 
+  // cartCount calculates the total number of items in the cart by summing up the quantities of all items.
   const cartCount = cartItems.reduce((s, i) => s + i.quantity, 0);
 
   return (
@@ -91,13 +113,31 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={<PageLayout cartCount={cartCount} onNavigate={navigateToPage} page="home" />}
+          element={
+            <PageLayout
+              cartCount={cartCount}
+              onNavigate={navigateToPage}
+              page="home"
+            />
+          }
         >
           <Route index element={<HomePage onNavigate={navigateToPage} />} />
-          <Route path="shop" element={<ShopPage onNavigate={navigateToPage} />} />
-          <Route path="collection" element={<ShopPage onNavigate={navigateToPage} />} />
-          <Route path="about" element={<AboutPage onNavigate={navigateToPage} />} />
-          <Route path="account" element={<AccountPage onNavigate={navigateToPage} />} />
+          <Route
+            path="shop"
+            element={<ShopPage onNavigate={navigateToPage} />}
+          />
+          <Route
+            path="collection"
+            element={<ShopPage onNavigate={navigateToPage} />}
+          />
+          <Route
+            path="about"
+            element={<AboutPage onNavigate={navigateToPage} />}
+          />
+          <Route
+            path="account"
+            element={<AccountPage onNavigate={navigateToPage} />}
+          />
           <Route
             path="cart"
             element={
@@ -128,7 +168,10 @@ export default function App() {
               />
             }
           />
-          <Route path="admin" element={<AdminDashboard onNavigate={navigateToPage} />} />
+          <Route
+            path="admin"
+            element={<AdminDashboard onNavigate={navigateToPage} />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
@@ -161,7 +204,11 @@ function PageLayout({
 }) {
   return (
     <>
-      <Navbar cartCount={cartCount} onNavigate={onNavigate} currentPage={page} />
+      <Navbar
+        cartCount={cartCount}
+        onNavigate={onNavigate}
+        currentPage={page}
+      />
       <Outlet />
     </>
   );
@@ -282,5 +329,3 @@ function AboutPage({ onNavigate }: { onNavigate: (p: string) => void }) {
     </div>
   );
 }
-
-
