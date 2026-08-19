@@ -25,7 +25,7 @@ export function AccountPage({
   if (loading) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center">
-        <Loader size={18} className="animate-spin" />get 
+        <Loader size={18} className="animate-spin" />
       </div>
     );
   }
