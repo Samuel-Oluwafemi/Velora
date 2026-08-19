@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Loader } from "lucide-react";
 
+// ForgotPasswordForm is a React component that provides a form for users to request a password reset email. It uses the useAuth hook to access authentication methods and state, including the resetPassword function and loading state. The component manages local state for the email input, success message, and error messages. When the form is submitted, it attempts to send a password reset email and displays appropriate feedback to the user.
 export default function ForgotPasswordForm({
   onSwitch,
 }: {
