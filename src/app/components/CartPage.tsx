@@ -8,6 +8,7 @@ interface CartPageProps {
   onUpdateQuantity: (productId: string, size: string, qty: number) => void;
   onRemove: (productId: string, size: string) => void;
   onNavigate: (page: string, productId?: string) => void;
+  onCheckout: () => void;
 }
 
 export function CartPage({
@@ -15,6 +16,7 @@ export function CartPage({
   onUpdateQuantity,
   onRemove,
   onNavigate,
+  onCheckout,
 }: CartPageProps) {
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -323,8 +325,9 @@ export function CartPage({
               </div>
 
               <button
-                onClick={() => onNavigate("checkout")}
-                className="w-full py-4 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground transition-colors duration-300"
+                onClick={onCheckout}
+                className="w-full py-4 bg-foreground text-primary-foreground hover:bg-accent 
+                hover:text-foreground transition-colors duration-300 cursor-pointer"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: "0.78rem",
