@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Loader } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import SignInForm from "./auth/SignInForm";
 import SignUpForm from "./auth/SignUpForm";
@@ -10,13 +12,20 @@ export function AccountPage({
 }: {
   onNavigate: (p: string) => void;
 }) {
-  const { user, loading } = useAuth(); 
+  const { user, loading } = useAuth();
+
+  // get the location and navigate functions from react-router-dom
+  const location = useLocation();
+  const navigate = useNavigate();
+  const from = location.state?.from || "/";
+
+// State to manage the current view (signin, signup, forgot)
   const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
 
   if (loading) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center">
-        <p>Loading…</p>
+        <Loader size={18} className="animate-spin" />
       </div>
     );
   }
@@ -50,16 +59,13 @@ export function AccountPage({
         {user ? (
           <AccountDashboard />
         ) : (
+          // Render the appropriate form based on the current view state
           <div>
             {view === "signin" && (
-              <SignInForm
-                onSwitch={setView}
-              />
+              <SignInForm onSwitch={setView} onSuccess={() => navigate(from)} />
             )}
             {view === "signup" && (
-              <SignUpForm
-                onSwitch={setView}
-              />
+              <SignUpForm onSwitch={setView} onSuccess={() => navigate(from)} />
             )}
             {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
           </div>
