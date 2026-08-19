@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { Loader, FileWarning } from "lucide-react";
+import { Loader } from "lucide-react";
 
 export default function SignInForm({
   onSwitch,
