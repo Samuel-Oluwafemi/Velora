@@ -5,6 +5,7 @@ interface ProductCardProps {
   onClick: () => void;
 }
 
+// ProductCard is a reusable component that displays product information in a card format. It shows the product image, name, category, price, and an optional tag. The card has hover effects to enhance user interaction.
 export function ProductCard({ product, onClick }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -28,6 +29,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           className="w-full h-full object-cover transition-transform duration-700"
           style={{ transform: hovered ? "scale(1.04)" : "scale(1)" }}
         />
+        {/* Tag */}
         {product.tag && (
           <span
             className="absolute top-4 left-4 px-3 py-1 bg-foreground text-primary-foreground"
