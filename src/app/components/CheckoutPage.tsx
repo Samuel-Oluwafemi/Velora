@@ -21,6 +21,8 @@ export function CheckoutPage({
   const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [form, setForm] = useState({
     email: "",
     firstName: "",
@@ -44,45 +46,54 @@ export function CheckoutPage({
 
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-// Create the order when the user clicks "Place Order"
+  // Create the order when the user clicks "Place Order"
   const handlePlaceOrder = async () => {
-  if (!user) {
-    console.error("User is not authenticated");
-    return;
-  }
+    if (!user) {
+      setOrderError("You must be logged in to place an order.");
+      return;
+    }
 
-  // Create the order using the order service
-  try {
-    const orderId = await createOrder({
-      userId: user.uid,
-      email: form.email,
-      
-      customer: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-      },
+    setOrderLoading(true);
+    setOrderError(null);
 
-      items: cartItems,
+    // Create the order using the order service
+    try {
+      const orderId = await createOrder({
+        userId: user.uid,
+        email: form.email,
 
-      shippingAddress: {
-        address: form.address,
-        city: form.city,
-        postcode: form.postcode,
-        country: form.country,
-      },
+        customer: {
+          firstName: form.firstName,
+          lastName: form.lastName,
+        },
 
-      subtotal,
-      shipping,
-      total,
-    });
+        items: cartItems,
 
-    console.log("Order created:");
+        shippingAddress: {
+          address: form.address,
+          city: form.city,
+          postcode: form.postcode,
+          country: form.country,
+        },
 
-    setCompleted(true);
-  } catch (error) {
-    console.error("Failed to create order:", error);
-  }
-};
+        subtotal,
+        shipping,
+        total,
+      });
+
+      console.log("Order created");
+
+      setCompleted(true);
+    } catch (error) {
+      console.error("Failed to create order:", error);
+
+      setOrderError(
+        "We couldn't place your order at this moment. Please try again later.",
+      );
+    } finally {
+      setOrderLoading(false);
+    }
+  };
 
   const inputClass =
     "w-full px-4 py-3 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
@@ -495,6 +506,20 @@ export function CheckoutPage({
               </div>
             )}
 
+            {/* Order error */}
+            {orderError && (
+              <div
+                className="mt-6 p-4 border border-red-200 bg-red-50 text-red-700"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.75rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                {orderError}
+              </div>
+            )}
+
             {/* Nav buttons */}
             <div className="flex items-center justify-between mt-10">
               <button
@@ -531,8 +556,10 @@ export function CheckoutPage({
               ) : (
                 <button
                   onClick={handlePlaceOrder}
+                  disabled={orderLoading}
                   className="px-9 py-3.5 bg-foreground text-primary-foreground hover:bg-accent 
-                  hover:text-foreground transition-colors duration-300"
+                  hover:text-foreground transition-colors duration-300 cursor-pointer duration-300 
+                  disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "0.75rem",
@@ -540,7 +567,9 @@ export function CheckoutPage({
                     textTransform: "uppercase",
                   }}
                 >
-                  Place Order · €{total}
+                  {orderLoading
+                    ? "Placing Order..."
+                    : `Place Order · €${total}`}
                 </button>
               )}
             </div>
@@ -575,6 +604,7 @@ export function CheckoutPage({
                         className="w-full h-full object-cover"
                       />
                     </div>
+                    {/* Product Details */}
                     <div className="flex-1 flex flex-col justify-center">
                       <p
                         className="text-foreground"
@@ -607,6 +637,7 @@ export function CheckoutPage({
                   </div>
                 ))}
               </div>
+              {/* Order Totals */}
               <div className="border-t border-border pt-4 space-y-2.5">
                 <div className="flex justify-between">
                   <span
@@ -628,6 +659,7 @@ export function CheckoutPage({
                     €{subtotal}
                   </span>
                 </div>
+                {/* Shipping */}
                 <div className="flex justify-between">
                   <span
                     className="text-muted-foreground"
