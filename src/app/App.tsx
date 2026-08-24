@@ -4,9 +4,11 @@ import {
   Outlet,
   Route,
   Routes,
+  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
+import { Loader } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { CartItem } from "./components/store";
 import { Navbar } from "./components/Navbar";
@@ -23,8 +25,8 @@ import featuredImg1 from "../assets/images/Relaxed.png";
 
 export default function App() {
   const navigate = useNavigate();
-  // Get the current user from the authentication context
-  const { user } = useAuth();
+  // Get
+  const { user, loading: authLoading } = useAuth();
 
   // checkout handler checks if the cart is empty or if the user is not logged in. If the cart is empty, it does nothing. If the user is not logged in, it navigates to the account page. Otherwise, it navigates to the checkout page.
   const handleCheckout = () => {
@@ -123,6 +125,50 @@ export default function App() {
       prev.filter((i) => !(i.product.id === productId && i.size === size)),
     );
   };
+
+  function CheckoutRoute({
+    cartItems,
+    onNavigate,
+    onOrderComplete,
+    authLoading,
+  }: {
+    cartItems: CartItem[];
+    onNavigate: (page: string) => void;
+    onOrderComplete: () => void;
+    authLoading: boolean;
+  }) {
+    const { user } = useAuth();
+
+    if (authLoading) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <Loader size={20} className="animate-spin" />
+      </div>
+    );
+  }
+
+   if (cartItems.length === 0) {
+    return <Navigate to="/cart" replace />;
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/account"
+        replace
+        state={{ from: "/checkout" }}
+      />
+    );
+  }
+
+   return (
+    <CheckoutPage
+      cartItems={cartItems}
+      onNavigate={onNavigate}
+      onOrderComplete={onOrderComplete}
+    />
+  );
+  }
 
   // cartCount calculates the total number of items in the cart by summing up the quantities of all items.
   const cartCount = cartItems.reduce((s, i) => s + i.quantity, 0);
