@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { createOrder } from "../../services/orderService";
 import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -16,6 +18,7 @@ export function CheckoutPage({
   onNavigate,
   onOrderComplete,
 }: CheckoutPageProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [form, setForm] = useState({
@@ -40,6 +43,46 @@ export function CheckoutPage({
   const total = subtotal + shipping;
 
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+// Create the order when the user clicks "Place Order"
+  const handlePlaceOrder = async () => {
+  if (!user) {
+    console.error("User is not authenticated");
+    return;
+  }
+
+  // Create the order using the order service
+  try {
+    const orderId = await createOrder({
+      userId: user.uid,
+      email: form.email,
+      
+      customer: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+      },
+
+      items: cartItems,
+
+      shippingAddress: {
+        address: form.address,
+        city: form.city,
+        postcode: form.postcode,
+        country: form.country,
+      },
+
+      subtotal,
+      shipping,
+      total,
+    });
+
+    console.log("Order created:", orderId);
+
+    setCompleted(true);
+  } catch (error) {
+    console.error("Failed to create order:", error);
+  }
+};
 
   const inputClass =
     "w-full px-4 py-3 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
@@ -487,7 +530,7 @@ export function CheckoutPage({
                 </button>
               ) : (
                 <button
-                  onClick={() => setCompleted(true)}
+                  onClick={handlePlaceOrder}
                   className="px-9 py-3.5 bg-foreground text-primary-foreground hover:bg-accent 
                   hover:text-foreground transition-colors duration-300"
                   style={{
