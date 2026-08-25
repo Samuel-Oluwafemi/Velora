@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { Loader} from "lucide-react";
+import { Eye, EyeOff, Loader } from "lucide-react";
 
 export default function SignUpForm({
   onSwitch,
@@ -14,6 +14,8 @@ export default function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,34 +66,64 @@ export default function SignUpForm({
       </div>
 
       <div>
-        {/* Password */}
         <label className="block text-muted-foreground mb-2">Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          placeholder="••••••••"
-          autoComplete="current-password"
-          className="w-full px-4 py-3 border border-border bg-background text-foreground"
-        />
+
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="w-full px-4 py-3 pr-12 border border-border bg-background text-foreground"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground 
+            transition-colors cursor-pointer"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Confirm Password */}
       <div>
-        <label className="block text-muted-foreground mb-2">
-          Confirm Password
-        </label>
-        <input
-          type="password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          required
-          placeholder="••••••••"
-          autoComplete="current-password"
-          className="w-full px-4 py-3 border border-border bg-background text-foreground"
-        />
-      </div>
+  <label className="block text-muted-foreground mb-2">
+    Confirm Password
+  </label>
+
+  <div className="relative">
+    <input
+      type={showConfirmPassword ? "text" : "password"}
+      value={confirm}
+      onChange={(e) => setConfirm(e.target.value)}
+      required
+      placeholder="••••••••"
+      autoComplete="new-password"
+      className="w-full px-4 py-3 pr-12 border border-border bg-background text-foreground"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowConfirmPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2
+      text-muted-foreground hover:text-foreground
+      transition-colors cursor-pointer"
+      aria-label={
+        showConfirmPassword
+          ? "Hide confirm password"
+          : "Show confirm password"
+      }
+    >
+      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
 
       {/* Submit */}
       <button
