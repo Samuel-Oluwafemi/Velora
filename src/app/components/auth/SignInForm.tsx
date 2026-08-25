@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { Loader } from "lucide-react";
+import { Eye, EyeOff, Loader } from "lucide-react";
 
 export default function SignInForm({
   onSwitch,
@@ -9,9 +9,10 @@ export default function SignInForm({
   onSwitch: (view: "signin" | "signup" | "forgot") => void;
   onSuccess?: () => void;
 }) {
-  const {login, loginLoading } = useAuth();
+  const { login, loginLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,18 +42,31 @@ export default function SignInForm({
         />
       </div>
 
-        {/* Password */}
+      {/* Password */}
       <div>
         <label className="block text-muted-foreground mb-2">Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          placeholder="••••••••"
-          autoComplete="current-password"
-          className="w-full px-4 py-3 border border-border bg-background text-foreground"
-        />
+
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="w-full px-4 py-3 pr-12 border border-border bg-background text-foreground"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground 
+            transition-colors cursor-pointer"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Forgot password */}
@@ -74,13 +88,13 @@ export default function SignInForm({
             transition duration-200 flex justify-center gap-2 items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {loginLoading ? (
-                    <>
-                      <Loader size={18} className="animate-spin" />
-                      <span>Signing in...</span>
-                    </>
-                  ) : (
-                    "Sign In"
-                  )}
+            <>
+              <Loader size={18} className="animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            "Sign In"
+          )}
         </button>
 
         {/* Create account */}
