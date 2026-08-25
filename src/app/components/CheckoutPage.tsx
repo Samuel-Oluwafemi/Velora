@@ -21,6 +21,7 @@ export function CheckoutPage({
   const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -82,7 +83,9 @@ export function CheckoutPage({
       });
 
       console.log("Order created");
+      setOrderId(orderId);
 
+      onOrderComplete();
       setCompleted(true);
     } catch (error) {
       console.error("Failed to create order:", error);
@@ -108,6 +111,7 @@ export function CheckoutPage({
   if (completed) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
+        {/*  */}
         <div className="text-center max-w-sm">
           <div
             className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-8"
@@ -131,6 +135,34 @@ export function CheckoutPage({
           >
             Thank you, {form.firstName}.
           </h1>
+          {/* Order Number */}
+          {orderId && (
+            <div
+              className="mb-6 px-5 py-4 border border-border bg-secondary"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              <p
+                className="text-muted-foreground uppercase tracking-[0.15em] mb-1"
+                style={{
+                  fontSize: "0.65rem",
+                }}
+              >
+                Order Number
+              </p>
+
+              <p
+                className="text-foreground"
+                style={{
+                  fontSize: "0.85rem",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                #{orderId}
+              </p>
+            </div>
+          )}
           <p
             className="text-muted-foreground mb-10"
             style={{
@@ -148,7 +180,6 @@ export function CheckoutPage({
           </p>
           <button
             onClick={() => {
-              onOrderComplete();
               onNavigate("home");
             }}
             className="px-10 py-3.5 bg-foreground text-primary-foreground hover:bg-accent hover:text-foreground 
