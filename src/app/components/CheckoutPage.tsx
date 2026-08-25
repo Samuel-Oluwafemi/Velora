@@ -33,11 +33,7 @@ export function CheckoutPage({
     address: "",
     city: "",
     postcode: "",
-    country: "France",
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-    cardName: "",
+    country: "Nigeria",
   });
 
   const subtotal = cartItems.reduce(
@@ -54,146 +50,132 @@ export function CheckoutPage({
 
   //
   const validateStep = () => {
-    setValidationError(null);
+  setValidationError(null);
 
-    if (step === 0) {
-      if (
-        !form.email.trim() ||
-        !form.firstName.trim() ||
-        !form.lastName.trim()
-      ) {
-        setValidationError("Please complete all contact information.");
-        return false;
-      }
-
-      if (!form.email.includes("@")) {
-        setValidationError("Please enter a valid email address.");
-        return false;
-      }
+  if (step === 0) {
+    if (
+      !form.email.trim() ||
+      !form.firstName.trim() ||
+      !form.lastName.trim()
+    ) {
+      setValidationError("Please complete all contact information.");
+      return false;
     }
 
-    if (step === 1) {
-      if (
-        !form.address.trim() ||
-        !form.city.trim() ||
-        !form.postcode.trim() ||
-        !form.country.trim()
-      ) {
-        setValidationError("Please complete all shipping information.");
-        return false;
-      }
+    if (!form.email.includes("@")) {
+      setValidationError("Please enter a valid email address.");
+      return false;
     }
+  }
 
-    if (step === 2) {
-      if (
-        !form.cardName.trim() ||
-        !form.cardNumber.trim() ||
-        !form.expiry.trim() ||
-        !form.cvv.trim()
-      ) {
-        setValidationError("Please complete all payment information.");
-        return false;
-      }
+  if (step === 1) {
+    if (
+      !form.address.trim() ||
+      !form.city.trim() ||
+      !form.postcode.trim() ||
+      !form.country.trim()
+    ) {
+      setValidationError("Please complete all shipping information.");
+      return false;
     }
+  }
 
-    return true;
-  };
+  return true;
+};
 
   // Create the order when the user clicks "Place Order"
   const handlePlaceOrder = async () => {
-  if (!user) {
-    setOrderError("You must be logged in to place an order.");
-    return;
-  }
-
-  setOrderLoading(true);
-  setOrderError(null);
-
-  try {
-    const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-
-    if (!publicKey) {
-      throw new Error("Paystack public key is missing.");
+    if (!user) {
+      setOrderError("You must be logged in to place an order.");
+      return;
     }
 
-    const paystack = new Paystack();
+    setOrderLoading(true);
+    setOrderError(null);
 
-    paystack.newTransaction({
-      key: publicKey,
+    try {
+      const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
-      email: form.email,
+      if (!publicKey) {
+        throw new Error("Paystack public key is missing.");
+      }
 
-      amount: total * 100,
+      const paystack = new Paystack();
 
-      currency: "NGN",
+      paystack.newTransaction({
+        key: publicKey,
 
-      firstName: form.firstName,
+        email: form.email,
 
-      lastName: form.lastName,
+        amount: total * 100,
 
-      reference: `VELORA-${Date.now()}`,
+        currency: "NGN",
 
-      onSuccess: async (transaction) => {
-        try {
-          console.log("Payment successful:", transaction);
+        firstName: form.firstName,
 
-          const orderId = await createOrder({
-            userId: user.uid,
-            email: form.email,
+        lastName: form.lastName,
 
-            customer: {
-              firstName: form.firstName,
-              lastName: form.lastName,
-            },
+        reference: `VELORA-${Date.now()}`,
 
-            items: cartItems,
+        onSuccess: async (transaction) => {
+          try {
+            console.log("Payment successful:", transaction);
 
-            shippingAddress: {
-              address: form.address,
-              city: form.city,
-              postcode: form.postcode,
-              country: form.country,
-            },
+            const orderId = await createOrder({
+              userId: user.uid,
+              email: form.email,
 
-            subtotal,
-            shipping,
-            total,
-          });
+              customer: {
+                firstName: form.firstName,
+                lastName: form.lastName,
+              },
 
-          console.log("Order created:", orderId);
+              items: cartItems,
 
-          setOrderId(orderId);
+              shippingAddress: {
+                address: form.address,
+                city: form.city,
+                postcode: form.postcode,
+                country: form.country,
+              },
 
-          onOrderComplete();
-          setCompleted(true);
-        } catch (error) {
-          console.error("Failed to create order:", error);
+              subtotal,
+              shipping,
+              total,
+            });
 
-          setOrderError(
-            "Payment was successful, but we couldn't create your order. Please contact us.",
-          );
-        } finally {
+            console.log("Order created:", orderId);
+
+            setOrderId(orderId);
+
+            onOrderComplete();
+            setCompleted(true);
+          } catch (error) {
+            console.error("Failed to create order:", error);
+
+            setOrderError(
+              "Payment was successful, but we couldn't create your order. Please contact us.",
+            );
+          } finally {
+            setOrderLoading(false);
+          }
+        },
+
+        onCancel: () => {
+          console.log("Payment cancelled.");
+
+          setOrderError("Payment was cancelled.");
           setOrderLoading(false);
-        }
-      },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to initialize Paystack:", error);
 
-      onCancel: () => {
-        console.log("Payment cancelled.");
+      setOrderError("We couldn't initialize payment. Please try again.");
 
-        setOrderError("Payment was cancelled.");
-        setOrderLoading(false);
-      },
-    });
-  } catch (error) {
-    console.error("Failed to initialize Paystack:", error);
-
-    setOrderError(
-      "We couldn't initialize payment. Please try again.",
-    );
-
-    setOrderLoading(false);
-  }
-};
+      setOrderLoading(false);
+    }
+  };
 
   const inputClass =
     "w-full px-4 py-3 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
@@ -521,12 +503,11 @@ export function CheckoutPage({
                       style={inputStyle}
                     >
                       {[
-                        "France",
-                        "Germany",
+                        "Nigeria",
+                        "Ghana",
+                        "Kenya",
+                        "South Africa",
                         "United Kingdom",
-                        "Italy",
-                        "Spain",
-                        "Netherlands",
                         "United States",
                       ].map((c) => (
                         <option key={c}>{c}</option>
@@ -550,91 +531,62 @@ export function CheckoutPage({
                 >
                   Payment
                 </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      className="block text-muted-foreground mb-2"
-                      style={labelStyle}
-                    >
-                      Name on Card
-                    </label>
-                    <input
-                      type="text"
-                      value={form.cardName}
-                      onChange={(e) => update("cardName", e.target.value)}
-                      placeholder="Camille Moreau"
-                      className={inputClass}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="block text-muted-foreground mb-2"
-                      style={labelStyle}
-                    >
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      value={form.cardNumber}
-                      onChange={(e) => update("cardNumber", e.target.value)}
-                      placeholder="4242 4242 4242 4242"
-                      maxLength={19}
-                      required
-                      className={inputClass}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+
+                <div
+                  className="border border-border bg-secondary p-6"
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="text-lg">🔒</div>
+
                     <div>
-                      <label
-                        className="block text-muted-foreground mb-2"
-                        style={labelStyle}
+                      <p
+                        className="text-foreground mb-2"
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 500,
+                        }}
                       >
-                        Expiry
-                      </label>
-                      <input
-                        type="text"
-                        value={form.expiry}
-                        onChange={(e) => update("expiry", e.target.value)}
-                        placeholder="MM / YY"
-                        maxLength={7}
-                        required
-                        className={inputClass}
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        className="block text-muted-foreground mb-2"
-                        style={labelStyle}
+                        Secure payment with Paystack
+                      </p>
+
+                      <p
+                        className="text-muted-foreground"
+                        style={{
+                          fontSize: "0.75rem",
+                          lineHeight: 1.6,
+                        }}
                       >
-                        CVV
-                      </label>
-                      <input
-                        type="text"
-                        value={form.cvv}
-                        onChange={(e) => update("cvv", e.target.value)}
-                        required
-                        placeholder="•••"
-                        maxLength={4}
-                        className={inputClass}
-                        style={inputStyle}
-                      />
+                        You'll complete your payment securely through Paystack.
+                        Your card details are entered directly on Paystack's
+                        secure checkout and are not stored by Velora.
+                      </p>
                     </div>
                   </div>
-                  <div
-                    className="flex items-center gap-2 mt-2 p-3 bg-secondary"
-                    style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontSize: "0.75rem",
-                      color: "#6B7280",
-                    }}
-                  >
-                    <span>🔒</span>
-                    <span>
-                      Your payment information is encrypted and secure.
-                    </span>
+
+                  <div className="border-t border-border mt-5 pt-5">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-muted-foreground"
+                        style={{
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        Amount to pay
+                      </span>
+
+                      <span
+                        className="text-foreground"
+                        style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: "1.25rem",
+                        }}
+                      >
+                        ₦{total.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
