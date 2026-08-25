@@ -19,7 +19,7 @@ export function AccountPage({
   const navigate = useNavigate();
   const from = location.state?.from || "/";
 
-// State to manage the current view (signin, signup, forgot)
+  // State to manage the current view (signin, signup, forgot)
   const [view, setView] = useState<"signin" | "signup" | "forgot">("signin");
 
   if (loading) {
@@ -61,23 +61,52 @@ export function AccountPage({
         ) : (
           // Render the appropriate form based on the current view state
           <div>
+            {/* SIGN IN */}
             {view === "signin" && (
-              <SignInForm onSwitch={setView} onSuccess={() => navigate(from,
-                {
-                  state: {
-                    toast: "Signed in successfully.",
-                  },
-                }
-              )} />
+              <SignInForm
+                onSwitch={setView}
+                onSuccess={() => {
+                  // If the user came from checkout,
+                  // send them back to checkout without showing
+                  // the normal sign-in success toast.
+                  if (from === "/checkout") {
+                    navigate(from);
+                    return;
+                  }
+
+                  // Normal sign-in:
+                  // go back to the original page and show a toast.
+                  navigate(from, {
+                    state: {
+                      toast: "Signed in successfully",
+                    },
+                  });
+                }}
+              />
             )}
+
+            {/* SIGN UP */}
             {view === "signup" && (
-              <SignUpForm onSwitch={setView} onSuccess={() => navigate(from, 
-                {
-                  state: {
-                    toast: "Account created successfully Welcome to VELORA.",
-                  },
-                }
-              )} />
+              <SignUpForm
+                onSwitch={setView}
+                onSuccess={() => {
+                  // If the user came from checkout,
+                  // send them back to checkout without showing
+                  // the account-created toast.
+                  if (from === "/checkout") {
+                    navigate(from);
+                    return;
+                  }
+
+                  // Normal account creation:
+                  // go back to the original page and show a toast.
+                  navigate(from, {
+                    state: {
+                      toast: "Account created successfully",
+                    },
+                  });
+                }}
+              />
             )}
             {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
           </div>
