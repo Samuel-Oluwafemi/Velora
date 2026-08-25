@@ -4,6 +4,7 @@ import { createOrder } from "../../services/orderService";
 import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import Paystack from "@paystack/inline-js";
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
@@ -100,54 +101,99 @@ export function CheckoutPage({
 
   // Create the order when the user clicks "Place Order"
   const handlePlaceOrder = async () => {
-    if (!user) {
-      setOrderError("You must be logged in to place an order.");
-      return;
+  if (!user) {
+    setOrderError("You must be logged in to place an order.");
+    return;
+  }
+
+  setOrderLoading(true);
+  setOrderError(null);
+
+  try {
+    const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
+    if (!publicKey) {
+      throw new Error("Paystack public key is missing.");
     }
 
-    setOrderLoading(true);
-    setOrderError(null);
+    const paystack = new Paystack();
 
-    // Create the order using the order service
-    try {
-      const orderId = await createOrder({
-        userId: user.uid,
-        email: form.email,
+    paystack.newTransaction({
+      key: publicKey,
 
-        customer: {
-          firstName: form.firstName,
-          lastName: form.lastName,
-        },
+      email: form.email,
 
-        items: cartItems,
+      amount: total * 100,
 
-        shippingAddress: {
-          address: form.address,
-          city: form.city,
-          postcode: form.postcode,
-          country: form.country,
-        },
+      currency: "NGN",
 
-        subtotal,
-        shipping,
-        total,
-      });
+      firstName: form.firstName,
 
-      console.log("Order created");
-      setOrderId(orderId);
+      lastName: form.lastName,
 
-      onOrderComplete();
-      setCompleted(true);
-    } catch (error) {
-      console.error("Failed to create order:", error);
+      reference: `VELORA-${Date.now()}`,
 
-      setOrderError(
-        "We couldn't place your order at this moment. Please try again later.",
-      );
-    } finally {
-      setOrderLoading(false);
-    }
-  };
+      onSuccess: async (transaction) => {
+        try {
+          console.log("Payment successful:", transaction);
+
+          const orderId = await createOrder({
+            userId: user.uid,
+            email: form.email,
+
+            customer: {
+              firstName: form.firstName,
+              lastName: form.lastName,
+            },
+
+            items: cartItems,
+
+            shippingAddress: {
+              address: form.address,
+              city: form.city,
+              postcode: form.postcode,
+              country: form.country,
+            },
+
+            subtotal,
+            shipping,
+            total,
+          });
+
+          console.log("Order created:", orderId);
+
+          setOrderId(orderId);
+
+          onOrderComplete();
+          setCompleted(true);
+        } catch (error) {
+          console.error("Failed to create order:", error);
+
+          setOrderError(
+            "Payment was successful, but we couldn't create your order. Please contact us.",
+          );
+        } finally {
+          setOrderLoading(false);
+        }
+      },
+
+      onCancel: () => {
+        console.log("Payment cancelled.");
+
+        setOrderError("Payment was cancelled.");
+        setOrderLoading(false);
+      },
+    });
+  } catch (error) {
+    console.error("Failed to initialize Paystack:", error);
+
+    setOrderError(
+      "We couldn't initialize payment. Please try again.",
+    );
+
+    setOrderLoading(false);
+  }
+};
 
   const inputClass =
     "w-full px-4 py-3 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
