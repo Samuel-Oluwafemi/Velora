@@ -141,7 +141,7 @@ export function ProductDetailPage({
                 letterSpacing: "0.04em",
               }}
             >
-              €{product.price}
+              ₦{product.price}
             </p>
 
             {/* Description */}

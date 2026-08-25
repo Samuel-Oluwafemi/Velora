@@ -36,7 +36,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p1",
     name: "Plain White T-Shirt",
-    price: 20,
+    price: 20000,
     category: "Tops",
     description:
       "A classic white t-shirt made from soft, breathable cotton. The perfect wardrobe staple for effortless style. Features a relaxed fit and a crew neckline.",
@@ -48,7 +48,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p2",
     name: "Ben Martin Men's Smart Fit Stretchable Jeans",
-    price: 65,
+    price: 25000,
     category: "Trousers",
     description:
       "Ben Martin Men's Smart Fit Stretchable Jeans || Mid-Rise Denim Pants with Whisker Wash || Premium Casual Wear Jean for Men.",
@@ -59,7 +59,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p3",
     name: "Plain Black T-Shirt",
-    price: 25,
+    price: 25000,
     category: "Tops",
     description:
       "A classic black t-shirt made from a soft blend of wool and recycled polyester. The breathable fabric keeps you comfortable, while the relaxed fit offers effortless style. Features a crew neckline and short sleeves.",
@@ -70,7 +70,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p4",
     name: "Loose-Fit Jeans",
-    price: 75,
+    price: 35000,
     category: "Trousers",
     description:
       "A pair of loose-fit jeans crafted from 100% extra-fine merino wool. The fabric is soft, breathable, and has a natural stretch for all-day comfort. Features a high-rise waist, wide legs, and a cropped length that pairs perfectly with boots or sneakers.",
@@ -82,7 +82,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p5",
     name: "Black Straight Trousers",
-    price: 120,
+    price: 15000,
     category: "Trousers",
     description:
       "A pair of tailored black straight trousers made from luxurious charmeuse silk. The fabric drapes beautifully and has a subtle sheen that elevates any outfit. Features a high-rise waist, straight legs, and a concealed side zipper for a sleek silhouette.",
@@ -97,7 +97,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p6",
     name: "Y2K Super Baggy Jeans",
-    price: 95,
+    price: 35000,
     category: "Shorts",
     description:
       "A pair of super baggy jeans with a distinctly Y2K vibe. Crafted from 100% Grade-A cashmere, these jeans are luxuriously soft and comfortable. The exaggerated wide-leg silhouette and low-rise waist create a bold, fashion-forward look that channels early 2000s street style.",
@@ -111,7 +111,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p7",
     name: "Black + White Striped Shirt and Trousers Set",
-    price: 45,
+    price: 65000,
     category: "Accessories",
     description:
       "A coordinated set featuring a black and white striped shirt paired with matching trousers. The shirt is made from a lightweight blend of wool and cotton, while the trousers are crafted from 100% wool felt. The shirt features a relaxed fit with a classic collar and button-down front, while the trousers have a straight-leg silhouette with an elastic waistband for comfort.",
@@ -125,7 +125,7 @@ export const PRODUCTS: Product[] = [
   {
     id: "p8",
     name: "Structured Wool Blazer",
-    price: 355,
+    price: 35500,
     category: "Outerwear",
     description:
       "A structured blazer crafted from a luxurious blend of wool and elastane. The fabric has a smooth finish and a slight stretch for comfort. Features a tailored fit with sharp lapels, a single-button closure, and welt pockets for a polished, professional look.",

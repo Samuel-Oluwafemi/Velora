@@ -77,7 +77,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             fontWeight: 400,
           }}
         >
-          €{product.price}
+          ₦{product.price}
         </p>
       </div>
     </div>

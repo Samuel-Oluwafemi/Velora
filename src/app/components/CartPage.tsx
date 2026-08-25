@@ -22,7 +22,7 @@ export function CartPage({
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
-  const shipping = subtotal > 300 ? 0 : 12;
+  const shipping = subtotal > 300000 ? 0 : 12000;
   const total = subtotal + shipping;
 
   if (cartItems.length === 0) {
@@ -198,7 +198,7 @@ export function CartPage({
                           fontWeight: 400,
                         }}
                       >
-                        €{(item.product.price * item.quantity).toLocaleString()} 
+                        ₦{(item.product.price * item.quantity).toLocaleString()} 
                       </p>
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export function CartPage({
                       fontSize: "0.82rem",
                     }}
                   >
-                    €{subtotal.toLocaleString()}
+                    ₦{subtotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -310,7 +310,7 @@ export function CartPage({
                       fontWeight: 400,
                     }}
                   >
-                    €{total.toLocaleString()}
+                    ₦{total.toLocaleString()}
                   </span>
                 </div>
                 <p

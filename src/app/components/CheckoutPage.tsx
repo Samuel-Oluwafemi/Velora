@@ -43,7 +43,7 @@ export function CheckoutPage({
     (s, i) => s + i.product.price * i.quantity,
     0,
   );
-  const shipping = subtotal > 300 ? 0 : 12;
+  const shipping = subtotal > 300000 ? 0 : 12000;
   const total = subtotal + shipping;
 
   const update = (k: string, v: string) => {
@@ -679,7 +679,7 @@ export function CheckoutPage({
                 >
                   {orderLoading
                     ? "Placing Order..."
-                    : `Place Order · €${total}`}
+                    : `Place Order · ₦${total}`}
                 </button>
               )}
             </div>
@@ -742,7 +742,7 @@ export function CheckoutPage({
                         fontSize: "0.8rem",
                       }}
                     >
-                      €{(item.product.price * item.quantity).toLocaleString()}
+                      ₦{(item.product.price * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 ))}
@@ -766,7 +766,7 @@ export function CheckoutPage({
                       fontSize: "0.8rem",
                     }}
                   >
-                    €{subtotal}
+                    ₦{subtotal}
                   </span>
                 </div>
                 {/* Shipping */}
@@ -787,7 +787,7 @@ export function CheckoutPage({
                       fontSize: "0.8rem",
                     }}
                   >
-                    {shipping === 0 ? "Free" : `€${shipping}`}
+                    {shipping === 0 ? "Free" : `₦${shipping}`}
                   </span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
@@ -807,7 +807,7 @@ export function CheckoutPage({
                       fontSize: "1rem",
                     }}
                   >
-                    €{total}
+                    ₦{total}
                   </span>
                 </div>
               </div>
