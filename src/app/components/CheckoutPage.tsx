@@ -24,6 +24,7 @@ export function CheckoutPage({
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [form, setForm] = useState({
     email: "",
     firstName: "",
@@ -45,7 +46,57 @@ export function CheckoutPage({
   const shipping = subtotal > 300 ? 0 : 12;
   const total = subtotal + shipping;
 
-  const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const update = (k: string, v: string) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    setValidationError(null);
+  };
+
+  //
+  const validateStep = () => {
+    setValidationError(null);
+
+    if (step === 0) {
+      if (
+        !form.email.trim() ||
+        !form.firstName.trim() ||
+        !form.lastName.trim()
+      ) {
+        setValidationError("Please complete all contact information.");
+        return false;
+      }
+
+      if (!form.email.includes("@")) {
+        setValidationError("Please enter a valid email address.");
+        return false;
+      }
+    }
+
+    if (step === 1) {
+      if (
+        !form.address.trim() ||
+        !form.city.trim() ||
+        !form.postcode.trim() ||
+        !form.country.trim()
+      ) {
+        setValidationError("Please complete all shipping information.");
+        return false;
+      }
+    }
+
+    if (step === 2) {
+      if (
+        !form.cardName.trim() ||
+        !form.cardNumber.trim() ||
+        !form.expiry.trim() ||
+        !form.cvv.trim()
+      ) {
+        setValidationError("Please complete all payment information.");
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   // Create the order when the user clicks "Place Order"
   const handlePlaceOrder = async () => {
@@ -301,6 +352,7 @@ export function CheckoutPage({
                       value={form.email}
                       onChange={(e) => update("email", e.target.value)}
                       placeholder="your@email.com"
+                      required
                       className={inputClass}
                       style={inputStyle}
                     />
@@ -318,6 +370,7 @@ export function CheckoutPage({
                         value={form.firstName}
                         onChange={(e) => update("firstName", e.target.value)}
                         placeholder="Camille"
+                        required
                         className={inputClass}
                         style={inputStyle}
                       />
@@ -333,6 +386,7 @@ export function CheckoutPage({
                         type="text"
                         value={form.lastName}
                         onChange={(e) => update("lastName", e.target.value)}
+                        required
                         placeholder="Moreau"
                         className={inputClass}
                         style={inputStyle}
@@ -480,6 +534,7 @@ export function CheckoutPage({
                       onChange={(e) => update("cardNumber", e.target.value)}
                       placeholder="4242 4242 4242 4242"
                       maxLength={19}
+                      required
                       className={inputClass}
                       style={inputStyle}
                     />
@@ -498,6 +553,7 @@ export function CheckoutPage({
                         onChange={(e) => update("expiry", e.target.value)}
                         placeholder="MM / YY"
                         maxLength={7}
+                        required
                         className={inputClass}
                         style={inputStyle}
                       />
@@ -513,6 +569,7 @@ export function CheckoutPage({
                         type="text"
                         value={form.cvv}
                         onChange={(e) => update("cvv", e.target.value)}
+                        required
                         placeholder="•••"
                         maxLength={4}
                         className={inputClass}
@@ -534,6 +591,20 @@ export function CheckoutPage({
                     </span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Validate error */}
+            {validationError && (
+              <div
+                className="mt-6 p-4 border border-red-200 bg-red-50 text-red-700"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.75rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                {validationError}
               </div>
             )}
 
@@ -571,7 +642,11 @@ export function CheckoutPage({
 
               {step < STEPS.length - 1 ? (
                 <button
-                  onClick={() => setStep(step + 1)}
+                  onClick={() => {
+                    if (validateStep()) {
+                      setStep(step + 1);
+                    }
+                  }}
                   className="flex items-center gap-1.5 px-9 py-3.5 bg-foreground text-primary-foreground 
                   hover:bg-accent hover:text-foreground transition-colors duration-300"
                   style={{
@@ -586,7 +661,11 @@ export function CheckoutPage({
                 </button>
               ) : (
                 <button
-                  onClick={handlePlaceOrder}
+                  onClick={() => {
+                    if (validateStep()) {
+                      void handlePlaceOrder();
+                    }
+                  }}
                   disabled={orderLoading}
                   className="px-9 py-3.5 bg-foreground text-primary-foreground hover:bg-accent 
                   hover:text-foreground transition-colors duration-300 cursor-pointer duration-300 
