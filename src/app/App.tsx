@@ -12,6 +12,7 @@ import { Loader } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { CartItem } from "./components/store";
 import { Navbar } from "./components/Navbar";
+import { Toast } from "./components/Toast";
 import { FAQs } from "./components/FAQs";
 import { HomePage } from "./components/HomePage";
 import { ShopPage } from "./components/ShopPage";
@@ -25,8 +26,12 @@ import featuredImg1 from "../assets/images/Relaxed.png";
 
 export default function App() {
   const navigate = useNavigate();
-  // Get
+  const location = useLocation();
+
   const { user, loading: authLoading } = useAuth();
+
+  // 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // checkout handler checks if the cart is empty or if the user is not logged in. If the cart is empty, it does nothing. If the user is not logged in, it navigates to the account page. Otherwise, it navigates to the checkout page.
   const handleCheckout = () => {
@@ -60,6 +65,31 @@ export default function App() {
       return [];
     }
   });
+
+  // Handle toast messages from navigation state
+  useEffect(() => {
+  const state = location.state as {
+    toast?: string;
+  } | null;
+
+  if (!state?.toast) {
+    return;
+  }
+
+  setToastMessage(state.toast);
+
+  const timer = setTimeout(() => {
+    setToastMessage(null);
+
+    // Remove the toast from the browser history state
+    navigate(location.pathname, {
+      replace: true,
+      state: {},
+    });
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [location, navigate]);
 
   // Persist cart items to localStorage whenever they change
   useEffect(() => {
@@ -140,34 +170,28 @@ export default function App() {
     const { user } = useAuth();
 
     if (authLoading) {
-    return (
-      <div className="bg-background min-h-screen flex items-center justify-center">
-        <Loader size={20} className="animate-spin" />
-      </div>
-    );
-  }
+      return (
+        <div className="bg-background min-h-screen flex items-center justify-center">
+          <Loader size={20} className="animate-spin" />
+        </div>
+      );
+    }
 
-   if (cartItems.length === 0) {
-    return <Navigate to="/cart" replace />;
-  }
+    if (cartItems.length === 0) {
+      return <Navigate to="/cart" replace />;
+    }
 
-  if (!user) {
+    if (!user) {
+      return <Navigate to="/account" replace state={{ from: "/checkout" }} />;
+    }
+
     return (
-      <Navigate
-        to="/account"
-        replace
-        state={{ from: "/checkout" }}
+      <CheckoutPage
+        cartItems={cartItems}
+        onNavigate={onNavigate}
+        onOrderComplete={onOrderComplete}
       />
     );
-  }
-
-   return (
-    <CheckoutPage
-      cartItems={cartItems}
-      onNavigate={onNavigate}
-      onOrderComplete={onOrderComplete}
-    />
-  );
   }
 
   // cartCount calculates the total number of items in the cart by summing up the quantities of all items.
@@ -178,6 +202,7 @@ export default function App() {
       className="bg-background text-foreground"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
+      {toastMessage && <Toast message={toastMessage} />}
       <Routes>
         <Route
           path="/"
