@@ -33,14 +33,8 @@ export function AccountPage({
   return (
     <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-5 md:pt-20 pb-2 md:pb-10">
       <div className="w-full max-w-sm">
-        <p
-          className="text-muted-foreground uppercase tracking-[0.2em] mb-2 text-center"
-          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
-        >
-          VELORA
-        </p>
         <h1
-          className="text-foreground mb-8 text-center"
+          className="text-foreground mb-8 mt-9 md:mt-0 text-center"
           style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontSize: "2rem",
@@ -48,7 +42,7 @@ export function AccountPage({
           }}
         >
           {user
-            ? "My Account"
+            ? ""
             : view === "signup"
               ? "Create Account"
               : view === "forgot"
