@@ -1,6 +1,44 @@
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, getDocs, query, where, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../app/firebase";
 import { CartItem } from "../app/components/store";
+
+export interface Order {
+  id: string;
+
+  userId: string;
+
+  email: string;
+
+  customer: {
+    firstName: string;
+    lastName: string;
+  };
+
+  items: {
+    productId: string;
+    name: string;
+    price: number;
+    quantity: number;
+    size: string;
+    image: string;
+  }[];
+
+  shippingAddress: {
+    address: string;
+    city: string;
+    postcode: string;
+    country: string;
+  };
+
+  subtotal: number;
+  shipping: number;
+  total: number;
+
+  status: string;
+  paymentStatus: string;
+
+  createdAt: unknown;
+}
 
 interface CreateOrderData {
   userId: string;
@@ -55,4 +93,19 @@ export async function createOrder(orderData: CreateOrderData) {
   });
 
   return orderRef.id;
+}
+
+// Create the order-reading function
+export async function getUserOrders(userId: string) {
+  const ordersQuery = query(
+    collection(db, "orders"),
+    where("userId", "==", userId),
+  );
+
+  const snapshot = await getDocs(ordersQuery);
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 }
