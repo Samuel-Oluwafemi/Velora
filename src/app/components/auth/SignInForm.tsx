@@ -53,7 +53,7 @@ export default function SignInForm({
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="••••••••"
-            autoComplete="new-password"
+            autoComplete="current-password"
             className="w-full px-4 py-3 pr-12 border border-border bg-background text-foreground"
           />
 
