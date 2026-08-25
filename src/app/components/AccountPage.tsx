@@ -62,10 +62,22 @@ export function AccountPage({
           // Render the appropriate form based on the current view state
           <div>
             {view === "signin" && (
-              <SignInForm onSwitch={setView} onSuccess={() => navigate(from)} />
+              <SignInForm onSwitch={setView} onSuccess={() => navigate(from,
+                {
+                  state: {
+                    toast: "Signed in successfully.",
+                  },
+                }
+              )} />
             )}
             {view === "signup" && (
-              <SignUpForm onSwitch={setView} onSuccess={() => navigate(from)} />
+              <SignUpForm onSwitch={setView} onSuccess={() => navigate(from, 
+                {
+                  state: {
+                    toast: "Account created successfully Welcome to VELORA.",
+                  },
+                }
+              )} />
             )}
             {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
           </div>
