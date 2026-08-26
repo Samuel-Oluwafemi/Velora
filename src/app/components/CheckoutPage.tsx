@@ -50,38 +50,38 @@ export function CheckoutPage({
 
   //
   const validateStep = () => {
-  setValidationError(null);
+    setValidationError(null);
 
-  if (step === 0) {
-    if (
-      !form.email.trim() ||
-      !form.firstName.trim() ||
-      !form.lastName.trim()
-    ) {
-      setValidationError("Please complete all contact information.");
-      return false;
+    if (step === 0) {
+      if (
+        !form.email.trim() ||
+        !form.firstName.trim() ||
+        !form.lastName.trim()
+      ) {
+        setValidationError("Please complete all contact information.");
+        return false;
+      }
+
+      if (!form.email.includes("@")) {
+        setValidationError("Please enter a valid email address.");
+        return false;
+      }
     }
 
-    if (!form.email.includes("@")) {
-      setValidationError("Please enter a valid email address.");
-      return false;
+    if (step === 1) {
+      if (
+        !form.address.trim() ||
+        !form.city.trim() ||
+        !form.postcode.trim() ||
+        !form.country.trim()
+      ) {
+        setValidationError("Please complete all shipping information.");
+        return false;
+      }
     }
-  }
 
-  if (step === 1) {
-    if (
-      !form.address.trim() ||
-      !form.city.trim() ||
-      !form.postcode.trim() ||
-      !form.country.trim()
-    ) {
-      setValidationError("Please complete all shipping information.");
-      return false;
-    }
-  }
-
-  return true;
-};
+    return true;
+  };
 
   // Create the order when the user clicks "Place Order"
   const handlePlaceOrder = async () => {
@@ -119,8 +119,34 @@ export function CheckoutPage({
 
         onSuccess: async (transaction) => {
           try {
-            console.log("Payment successful:", transaction);
+            console.log("Paystack payment completed:", transaction);
 
+            // Verify the payment with our backend
+            const verificationResponse = await fetch(
+              "/.netlify/functions/verify-paystack",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  reference: transaction.reference,
+                  expectedAmount: total,
+                }),
+              },
+            );
+
+            const verificationData = await verificationResponse.json();
+
+            if (!verificationResponse.ok || !verificationData.success) {
+              throw new Error(
+                verificationData.message || "Payment verification failed.",
+              );
+            }
+
+            console.log("Payment verified successfully:", verificationData);
+
+            // Only create the order after payment verification succeeds
             const orderId = await createOrder({
               userId: user.uid,
               email: form.email,
@@ -144,17 +170,20 @@ export function CheckoutPage({
               total,
             });
 
-            console.log("Order created");
+            console.log("Order created:", orderId);
 
             setOrderId(orderId);
 
             onOrderComplete();
             setCompleted(true);
           } catch (error) {
-            console.error("Failed to create order:", error);
+            console.error(
+              "Payment verification or order creation failed:",
+              error,
+            );
 
             setOrderError(
-              "Payment was successful, but we couldn't create your order. Please contact us.",
+              "We couldn't verify your payment. Please contact us if money was deducted.",
             );
           } finally {
             setOrderLoading(false);
