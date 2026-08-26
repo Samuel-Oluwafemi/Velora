@@ -6,12 +6,12 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import Paystack from "@paystack/inline-js";
 
+// Props for the CheckoutPage component
 interface CheckoutPageProps {
   cartItems: CartItem[];
   onNavigate: (page: string) => void;
   onOrderComplete: () => void;
 }
-
 const STEPS = ["Contact", "Shipping", "Payment"];
 
 export function CheckoutPage({
@@ -36,6 +36,7 @@ export function CheckoutPage({
     country: "Nigeria",
   });
 
+  // Calculate subtotal, shipping, and total
   const subtotal = cartItems.reduce(
     (s, i) => s + i.product.price * i.quantity,
     0,
@@ -51,6 +52,7 @@ export function CheckoutPage({
   const validateStep = () => {
     setValidationError(null);
 
+    // Validate contact information on step 0
     if (step === 0) {
       if (
         !form.email.trim() ||
@@ -67,6 +69,7 @@ export function CheckoutPage({
       }
     }
 
+    // Validate shipping information on step 1
     if (step === 1) {
       if (
         !form.address.trim() ||
@@ -79,6 +82,7 @@ export function CheckoutPage({
       }
     }
 
+    // Validate payment information on step 2
     return true;
   };
 
@@ -89,12 +93,14 @@ export function CheckoutPage({
       return;
     }
 
+    // Validate the form before proceeding
     setOrderLoading(true);
     setOrderError(null);
 
     try {
       const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
+      // Check if the Paystack public key is available
       if (!publicKey) {
         throw new Error("Paystack public key is missing.");
       }
@@ -121,7 +127,7 @@ export function CheckoutPage({
             console.log("Paystack payment completed:", transaction);
 
             // Verify the payment with our backend
-            const verificationResponse = await fetch(
+            const verifyResponse = await fetch(
               "/.netlify/functions/verify-paystack",
               {
                 method: "POST",
@@ -135,21 +141,27 @@ export function CheckoutPage({
               },
             );
 
-            const verificationData = await verificationResponse.json();
+            // Check if the verification response is OK
+            const verifyData = await verifyResponse.json();
 
-            if (!verificationResponse.ok || !verificationData.success) {
+            // If the verification fails, throw an error
+            if (!verifyResponse.ok || !verifyData.success) {
               throw new Error(
-                verificationData.message || "Payment verification failed.",
+                verifyData.message || "Payment verification failed.",
               );
             }
 
-            console.log("Payment verified successfully:", verificationData);
+            console.log("Payment verified successfully:", verifyData);
 
-            // Only create the order after payment verification succeeds
+            // This is the VERIFIED transaction returned by our backend
+            const verifiedTransaction = verifyData.transaction;
+
+            // Now create the order in Firestore
             const orderId = await createOrder({
               userId: user.uid,
               email: form.email,
 
+              // Include the customer details in the order
               customer: {
                 firstName: form.firstName,
                 lastName: form.lastName,
@@ -157,6 +169,7 @@ export function CheckoutPage({
 
               items: cartItems,
 
+              // Include the shipping address in the order
               shippingAddress: {
                 address: form.address,
                 city: form.city,
@@ -164,9 +177,20 @@ export function CheckoutPage({
                 country: form.country,
               },
 
+              // Include the subtotal, shipping, and total in the order
               subtotal,
               shipping,
               total,
+
+              // Include the verified payment details in the order
+              payment: {
+                reference: verifiedTransaction.reference,
+                transactionId: verifiedTransaction.transactionId,
+                status: verifiedTransaction.status,
+                amount: verifiedTransaction.amount,
+                currency: verifiedTransaction.currency,
+                channel: verifiedTransaction.channel,
+              },
             });
 
             console.log("Order created:", orderId);
@@ -215,6 +239,7 @@ export function CheckoutPage({
     textTransform: "uppercase" as const,
   };
 
+  // Render the checkout page
   if (completed) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">

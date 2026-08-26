@@ -1,4 +1,11 @@
-import { addDoc, getDocs, query, where, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  getDocs,
+  query,
+  where,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../app/firebase";
 import { CartItem } from "../app/components/store";
 
@@ -34,6 +41,15 @@ export interface Order {
   shipping: number;
   total: number;
 
+  payment: {
+    reference: string;
+    transactionId: string;
+    status: string;
+    amount: number;
+    currency: string;
+    channel: string;
+  };
+
   status: string;
   paymentStatus: string;
 
@@ -61,6 +77,15 @@ interface CreateOrderData {
   subtotal: number;
   shipping: number;
   total: number;
+
+  payment: {
+    reference: string;
+    transactionId: string;
+    status: string;
+    amount: number;
+    currency: string;
+    channel: string;
+  };
 }
 
 // Create the order-writing function
@@ -86,8 +111,10 @@ export async function createOrder(orderData: CreateOrderData) {
     shipping: orderData.shipping,
     total: orderData.total,
 
+    payment: orderData.payment,
+
     status: "pending",
-    paymentStatus: "pending",
+    paymentStatus: "paid",
 
     createdAt: serverTimestamp(),
   });

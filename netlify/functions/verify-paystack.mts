@@ -1,4 +1,5 @@
-export default async (req: Request) => {
+// Verify Paystack Payment
+export default async (req: Request) => {  
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({
@@ -19,6 +20,7 @@ export default async (req: Request) => {
 
     const { reference, expectedAmount } = body;
 
+    // Check if reference and expectedAmount are provided
     if (!reference || !expectedAmount) {
       return new Response(
         JSON.stringify({
@@ -36,6 +38,7 @@ export default async (req: Request) => {
 
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
 
+    // Check if the secret key is available
     if (!secretKey) {
       console.error("PAYSTACK_SECRET_KEY is missing.");
 
@@ -53,6 +56,7 @@ export default async (req: Request) => {
       );
     }
 
+    // Verify the payment with Paystack
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -66,6 +70,7 @@ export default async (req: Request) => {
 
     const data = await response.json();
 
+    // Check if the response is OK and the status is true
     if (!response.ok || !data.status) {
       return new Response(
         JSON.stringify({
@@ -83,10 +88,9 @@ export default async (req: Request) => {
 
     const transaction = data.data;
 
-    const expectedAmountInKobo = Math.round(
-      Number(expectedAmount) * 100,
-    );
+    const expectedAmountInKobo = Math.round(Number(expectedAmount) * 100);
 
+    // Verify the payment status
     if (transaction.status !== "success") {
       return new Response(
         JSON.stringify({
@@ -102,6 +106,7 @@ export default async (req: Request) => {
       );
     }
 
+    // Verify the payment currency
     if (transaction.currency !== "NGN") {
       return new Response(
         JSON.stringify({
@@ -117,6 +122,7 @@ export default async (req: Request) => {
       );
     }
 
+    // Verify the payment amount
     if (transaction.amount !== expectedAmountInKobo) {
       return new Response(
         JSON.stringify({
@@ -132,12 +138,14 @@ export default async (req: Request) => {
       );
     }
 
+    // Return successful verification response
     return new Response(
       JSON.stringify({
         success: true,
         message: "Payment verified successfully.",
         transaction: {
           reference: transaction.reference,
+          transactionId: transaction.id,
           status: transaction.status,
           amount: transaction.amount,
           currency: transaction.currency,
