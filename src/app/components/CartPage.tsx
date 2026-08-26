@@ -22,7 +22,7 @@ export function CartPage({
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
-  const shipping = subtotal > 300000 ? 0 : 12000;
+  const shipping = subtotal > 200000 ? 0 : 12000;
   const total = subtotal + shipping;
 
   if (cartItems.length === 0) {
@@ -285,7 +285,7 @@ export function CartPage({
                       fontSize: "0.72rem",
                     }}
                   >
-                    Free shipping on orders over €300
+                    Free shipping on orders over ₦200,000
                   </p>
                 )}
               </div>
