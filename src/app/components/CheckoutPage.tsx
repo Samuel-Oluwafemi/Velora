@@ -144,7 +144,7 @@ export function CheckoutPage({
               total,
             });
 
-            console.log("Order created:", orderId);
+            console.log("Order created");
 
             setOrderId(orderId);
 
