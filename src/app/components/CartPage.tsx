@@ -274,7 +274,7 @@ export function CartPage({
                       fontSize: "0.82rem",
                     }}
                   >
-                    {shipping === 0 ? "Free" : `€${shipping}`}
+                    ₦{shipping === 0 ? "Free" : `${shipping.toLocaleString()}`}
                   </span>
                 </div>
                 {shipping > 0 && (
