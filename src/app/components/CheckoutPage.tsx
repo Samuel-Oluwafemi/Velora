@@ -48,7 +48,6 @@ export function CheckoutPage({
     setValidationError(null);
   };
 
-  //
   const validateStep = () => {
     setValidationError(null);
 
