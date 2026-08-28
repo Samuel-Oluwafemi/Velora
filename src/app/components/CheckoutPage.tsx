@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { createOrder } from "../../services/orderService";
+import {
+  createOrder,
+  createPaymentReference,
+} from "../../services/orderService";
 import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -105,6 +108,16 @@ export function CheckoutPage({
         throw new Error("Paystack public key is missing.");
       }
 
+      // Create the Paystack reference once
+      const reference = `VELORA-${Date.now()}`;
+
+      // Save the expected payment before opening Paystack
+      await createPaymentReference({
+        reference,
+        userId: user.uid,
+        amount: total * 100,
+      });
+
       const paystack = new Paystack();
 
       paystack.newTransaction({
@@ -120,7 +133,8 @@ export function CheckoutPage({
 
         lastName: form.lastName,
 
-        reference: `VELORA-${Date.now()}`,
+        // Use the SAME reference saved in Firestore
+        reference,
 
         onSuccess: async (transaction) => {
           try {
@@ -136,7 +150,6 @@ export function CheckoutPage({
                 },
                 body: JSON.stringify({
                   reference: transaction.reference,
-                  expectedAmount: total,
                 }),
               },
             );
@@ -144,7 +157,7 @@ export function CheckoutPage({
             // Check if the verification response is OK
             const verifyData = await verifyResponse.json();
 
-            // If the verification fails, throw an error
+            // If verification fails, throw an error
             if (!verifyResponse.ok || !verifyData.success) {
               throw new Error(
                 verifyData.message || "Payment verification failed.",
@@ -161,7 +174,6 @@ export function CheckoutPage({
               userId: user.uid,
               email: form.email,
 
-              // Include the customer details in the order
               customer: {
                 firstName: form.firstName,
                 lastName: form.lastName,
@@ -169,7 +181,6 @@ export function CheckoutPage({
 
               items: cartItems,
 
-              // Include the shipping address in the order
               shippingAddress: {
                 address: form.address,
                 city: form.city,
@@ -177,12 +188,11 @@ export function CheckoutPage({
                 country: form.country,
               },
 
-              // Include the subtotal, shipping, and total in the order
               subtotal,
               shipping,
               total,
 
-              // Include the verified payment details in the order
+              // Include the verified payment details
               payment: {
                 reference: verifiedTransaction.reference,
                 transactionId: verifiedTransaction.transactionId,
