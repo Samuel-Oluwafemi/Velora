@@ -162,6 +162,7 @@ export default async (req: Request) => {
   } catch (error) {
     console.error("Paystack verification error:", error);
 
+    // Return a generic error response for any unexpected errors
     return new Response(
       JSON.stringify({
         success: false,
