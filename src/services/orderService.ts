@@ -4,6 +4,8 @@ import {
   query,
   where,
   collection,
+  doc,
+  setDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../app/firebase";
@@ -86,6 +88,21 @@ interface CreateOrderData {
     currency: string;
     channel: string;
   };
+}
+
+// Create the payment reference-writing function
+export async function createPaymentReference(data: {
+  reference: string;
+  userId: string;
+  amount: number;
+}) {
+  await setDoc(doc(db, "paymentReferences", data.reference), {
+    userId: data.userId,
+    amount: data.amount,
+    currency: "NGN",
+    status: "pending",
+    createdAt: serverTimestamp(),
+  });
 }
 
 // Create the order-writing function
