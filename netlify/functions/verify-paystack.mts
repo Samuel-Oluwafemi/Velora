@@ -1,5 +1,22 @@
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
+// Initialize Firebase Admin SDK
+const firebaseApp =
+  getApps().length === 0
+    ? initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        }),
+      })
+    : getApps()[0];
+
+const adminDb = getFirestore(firebaseApp);
+
 // Verify Paystack Payment
-export default async (req: Request) => {  
+export default async (req: Request) => {
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({
@@ -18,14 +35,14 @@ export default async (req: Request) => {
   try {
     const body = await req.json();
 
-    const { reference, expectedAmount } = body;
+    const { reference } = body;
 
-    // Check if reference and expectedAmount are provided
-    if (!reference || !expectedAmount) {
+    // Check if payment reference is provided
+    if (!reference) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "Reference and expected amount are required.",
+          message: "Payment reference is required.",
         }),
         {
           status: 400,
@@ -88,7 +105,62 @@ export default async (req: Request) => {
 
     const transaction = data.data;
 
-    const expectedAmountInKobo = Math.round(Number(expectedAmount) * 100);
+    // Find the payment reference created before Paystack checkout
+    const paymentReferenceRef = adminDb
+      .collection("paymentReferences")
+      .doc(reference);
+
+    const paymentReferenceDoc = await paymentReferenceRef.get();
+
+    if (!paymentReferenceDoc.exists) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Payment reference not found.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    const paymentReference = paymentReferenceDoc.data();
+
+    // Verify the payment reference data against the transaction data
+    if (!paymentReference) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Payment reference data is missing.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    // Prevent the same payment reference from being verified more than once
+    if (paymentReference.status === "verified") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "This payment has already been processed.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
 
     // Verify the payment status
     if (transaction.status !== "success") {
@@ -122,12 +194,12 @@ export default async (req: Request) => {
       );
     }
 
-    // Verify the payment amount
-    if (transaction.amount !== expectedAmountInKobo) {
+    // Verify amount against the trusted Firestore record
+    if (transaction.amount !== paymentReference.amount) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "Payment amount does not match the order total.",
+          message: "Payment amount does not match the expected amount.",
         }),
         {
           status: 400,
@@ -137,6 +209,33 @@ export default async (req: Request) => {
         },
       );
     }
+
+    // 
+    await adminDb.runTransaction(async (transactionRef) => {
+  const paymentDoc = await transactionRef.get(paymentReferenceRef);
+
+  if (!paymentDoc.exists) {
+    throw new Error("Payment reference not found.");
+  }
+
+  const paymentData = paymentDoc.data();
+
+  // Check if the payment reference data is missing or if the payment has already been processed
+  if (!paymentData) {
+    throw new Error("Payment reference data is missing.");
+  }
+
+  // Check if the payment has already been processed
+  if (paymentData.status !== "pending") {
+    throw new Error("This payment has already been processed.");
+  }
+
+  transactionRef.update(paymentReferenceRef, {
+    status: "verified",
+    transactionId: transaction.id,
+    verifiedAt: new Date(),
+  });
+});
 
     // Return successful verification response
     return new Response(
