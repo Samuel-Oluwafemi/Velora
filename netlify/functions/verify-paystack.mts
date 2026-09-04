@@ -35,14 +35,34 @@ export default async (req: Request) => {
   try {
     const body = await req.json();
 
-    const { reference } = body;
+    const {
+      reference,
+      userId,
+      email,
+      customer,
+      items,
+      shippingAddress,
+      subtotal,
+      shipping,
+      total,
+    } = body;
 
     // Check if payment reference is provided
-    if (!reference) {
+    if (
+      !reference ||
+      !userId ||
+      !email ||
+      !customer ||
+      !items ||
+      !shippingAddress ||
+      subtotal === undefined ||
+      shipping === undefined ||
+      total === undefined
+    ) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "Payment reference is required.",
+          message: "Payment and order information are required.",
         }),
         {
           status: 400,
@@ -161,7 +181,6 @@ export default async (req: Request) => {
       );
     }
 
-
     // Verify the payment status
     if (transaction.status !== "success") {
       return new Response(
@@ -210,38 +229,76 @@ export default async (req: Request) => {
       );
     }
 
-    // 
+    const orderRef = adminDb.collection("orders").doc();
+
     await adminDb.runTransaction(async (transactionRef) => {
-  const paymentDoc = await transactionRef.get(paymentReferenceRef);
+      const paymentDoc = await transactionRef.get(paymentReferenceRef);
 
-  if (!paymentDoc.exists) {
-    throw new Error("Payment reference not found.");
-  }
+      if (!paymentDoc.exists) {
+        throw new Error("Payment reference not found.");
+      }
 
-  const paymentData = paymentDoc.data();
+      const paymentData = paymentDoc.data();
 
-  // Check if the payment reference data is missing or if the payment has already been processed
-  if (!paymentData) {
-    throw new Error("Payment reference data is missing.");
-  }
+      if (!paymentData) {
+        throw new Error("Payment reference data is missing.");
+      }
 
-  // Check if the payment has already been processed
-  if (paymentData.status !== "pending") {
-    throw new Error("This payment has already been processed.");
-  }
+      if (paymentData.status !== "pending") {
+        throw new Error("This payment has already been processed.");
+      }
 
-  transactionRef.update(paymentReferenceRef, {
-    status: "verified",
-    transactionId: transaction.id,
-    verifiedAt: new Date(),
-  });
-});
+      // Mark payment as verified
+      transactionRef.update(paymentReferenceRef, {
+        status: "verified",
+        transactionId: transaction.id,
+        verifiedAt: new Date(),
+      });
+
+      // Create the order
+      transactionRef.set(orderRef, {
+        userId,
+        email,
+
+        customer,
+
+        items: items.map((item: any) => ({
+          productId: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          size: item.size,
+          image: item.product.images[0],
+        })),
+
+        shippingAddress,
+
+        subtotal,
+        shipping,
+        total,
+
+        payment: {
+          reference: transaction.reference,
+          transactionId: transaction.id,
+          status: transaction.status,
+          amount: transaction.amount,
+          currency: transaction.currency,
+          channel: transaction.channel,
+        },
+
+        status: "pending",
+        paymentStatus: "paid",
+
+        createdAt: new Date(),
+      });
+    });
 
     // Return successful verification response
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Payment verified successfully.",
+        message: "Payment verified and order created successfully.",
+        orderId: orderRef.id,
         transaction: {
           reference: transaction.reference,
           transactionId: transaction.id,
