@@ -54,6 +54,7 @@
         "npm:cmdk@1.1.1",
         "npm:date-fns@3.6.0",
         "npm:embla-carousel-react@8.6.0",
+        "npm:firebase-admin@^14.3.0",
         "npm:firebase@^12.17.1",
         "npm:input-otp@1.4.2",
         "npm:lucide-react@0.487",
