@@ -210,6 +210,22 @@ export default async (req: Request) => {
       );
     }
 
+    // Verify that the payment reference belongs to the authenticated user
+    if (paymentReference.userId !== authenticatedUserId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "You are not authorized to process this payment.",
+        }),
+        {
+          status: 403,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
     // Prevent the same payment reference from being verified more than once
     if (paymentReference.status === "verified") {
       return new Response(
@@ -314,6 +330,33 @@ export default async (req: Request) => {
       };
     });
 
+    // Calculate the subtotal using trusted Firestore prices
+    const verifiedSubtotal = verifiedItems.reduce((sum: number, item: any) => {
+      return sum + item.price * item.quantity;
+    }, 0);
+
+    // Calculate shipping on the server
+    const verifiedShipping = verifiedSubtotal >= 50000 ? 0 : 3000;
+
+    // Calculate the total on the server
+    const verifiedTotal = verifiedSubtotal + verifiedShipping;
+
+    // Verify that Paystack charged the server-calculated total
+    if (transaction.amount !== verifiedTotal * 100) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Payment amount does not match the order total.",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
     const orderRef = adminDb.collection("orders").doc();
 
     // Use a transaction to ensure atomicity of the payment verification and order creation
@@ -352,9 +395,9 @@ export default async (req: Request) => {
 
         shippingAddress,
 
-        subtotal,
-        shipping,
-        total,
+        subtotal: verifiedSubtotal,
+        shipping: verifiedShipping,
+        total: verifiedTotal,
 
         payment: {
           reference: transaction.reference,
