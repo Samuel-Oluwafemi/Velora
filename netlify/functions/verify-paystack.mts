@@ -274,11 +274,53 @@ export default async (req: Request) => {
       );
     }
 
+    // Fetch the trusted product documents from Firestore
+    const productRefs = items.map((item: any) =>
+      adminDb.collection("products").doc(item.product.id),
+    );
+
+    const productDocs = await Promise.all(
+      productRefs.map((ref: any) => ref.get()),
+    );
+
+    // Check that every product exists
+    for (const productDoc of productDocs) {
+      if (!productDoc.exists) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: "One or more products could not be found.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }
+
+      // Build order items using trusted Firestore product data
+      const verifiedItems = items.map((item: any, index: number) => {
+        const productData = productDocs[index].data();
+
+        return {
+          productId: productData.id,
+          name: productData.name,
+          price: productData.price,
+          quantity: item.quantity,
+          size: item.size,
+        };
+      });
+    }
+
     const orderRef = adminDb.collection("orders").doc();
 
+    // Use a transaction to ensure atomicity of the payment verification and order creation
     await adminDb.runTransaction(async (transactionRef) => {
       const paymentDoc = await transactionRef.get(paymentReferenceRef);
 
+      // Check if the payment reference document exists
       if (!paymentDoc.exists) {
         throw new Error("Payment reference not found.");
       }
