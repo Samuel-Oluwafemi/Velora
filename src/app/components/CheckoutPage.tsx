@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { auth } from "../firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   createOrder,
@@ -140,70 +141,65 @@ export function CheckoutPage({
           try {
             console.log("Paystack payment completed:", transaction);
 
-            // Verify the payment with our backend
+            const firebaseUser = auth.currentUser;
+
+            // Check if the user is authenticated
+            if (!firebaseUser) {
+              throw new Error("User is not authenticated.");
+            }
+
+            const idToken = await firebaseUser.getIdToken();
+
+            // Send the payment reference and order information to our backend
             const verifyResponse = await fetch(
               "/.netlify/functions/verify-paystack",
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  Authorization: `Bearer ${idToken}`,
                 },
                 body: JSON.stringify({
                   reference: transaction.reference,
+
+                  userId: user.uid,
+                  email: form.email,
+
+                  customer: {
+                    firstName: form.firstName,
+                    lastName: form.lastName,
+                  },
+
+                  items: cartItems,
+
+                  shippingAddress: {
+                    address: form.address,
+                    city: form.city,
+                    postcode: form.postcode,
+                    country: form.country,
+                  },
+
+                  subtotal,
+                  shipping,
+                  total,
                 }),
               },
             );
 
-            // Check if the verification response is OK
+            // Check if the backend response is valid
             const verifyData = await verifyResponse.json();
 
-            // If verification fails, throw an error
+            // If verification or order creation fails, throw an error
             if (!verifyResponse.ok || !verifyData.success) {
               throw new Error(
                 verifyData.message || "Payment verification failed.",
               );
             }
 
-            console.log("Payment verified successfully:", verifyData);
+            console.log("Payment verified and order created:", verifyData);
 
-            // This is the VERIFIED transaction returned by our backend
-            const verifiedTransaction = verifyData.transaction;
-
-            // Now create the order in Firestore
-            const orderId = await createOrder({
-              userId: user.uid,
-              email: form.email,
-
-              customer: {
-                firstName: form.firstName,
-                lastName: form.lastName,
-              },
-
-              items: cartItems,
-
-              shippingAddress: {
-                address: form.address,
-                city: form.city,
-                postcode: form.postcode,
-                country: form.country,
-              },
-
-              subtotal,
-              shipping,
-              total,
-
-              // Include the verified payment details
-              payment: {
-                reference: verifiedTransaction.reference,
-                transactionId: verifiedTransaction.transactionId,
-                status: verifiedTransaction.status,
-                amount: verifiedTransaction.amount,
-                currency: verifiedTransaction.currency,
-                channel: verifiedTransaction.channel,
-              },
-            });
-
-            console.log("Order created:", orderId);
+            // The backend created the order and returned its ID
+            const orderId = verifyData.orderId;
 
             setOrderId(orderId);
 
