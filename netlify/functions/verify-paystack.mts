@@ -79,7 +79,7 @@ export default async (req: Request) => {
       );
     }
 
-    // Get the authenticated user's ID from the decoded token
+    // Get the authenticated user's ID from the decoded Firebase token
     const authenticatedUserId = decodedToken.uid;
 
     // Check if the authenticated user ID matches the user ID in the request body
@@ -299,20 +299,20 @@ export default async (req: Request) => {
           },
         );
       }
-
-      // Build order items using trusted Firestore product data
-      const verifiedItems = items.map((item: any, index: number) => {
-        const productData = productDocs[index].data();
-
-        return {
-          productId: productData.id,
-          name: productData.name,
-          price: productData.price,
-          quantity: item.quantity,
-          size: item.size,
-        };
-      });
     }
+
+    // Build order items using trusted Firestore product data
+    const verifiedItems = items.map((item: any, index: number) => {
+      const productData = productDocs[index].data();
+
+      return {
+        productId: productData.id,
+        name: productData.name,
+        price: productData.price,
+        quantity: item.quantity,
+        size: item.size,
+      };
+    });
 
     const orderRef = adminDb.collection("orders").doc();
 
@@ -348,14 +348,7 @@ export default async (req: Request) => {
 
         customer,
 
-        items: items.map((item: any) => ({
-          productId: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          size: item.size,
-          image: item.product.images[0],
-        })),
+        items: verifiedItems,
 
         shippingAddress,
 
