@@ -1,4 +1,5 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
 // Initialize Firebase Admin SDK
@@ -14,6 +15,7 @@ const firebaseApp =
     : getApps()[0];
 
 const adminDb = getFirestore(firebaseApp);
+const adminAuth = getAuth(firebaseApp);
 
 // Verify Paystack Payment
 export default async (req: Request) => {
@@ -35,9 +37,54 @@ export default async (req: Request) => {
   try {
     const body = await req.json();
 
+    // Check for Authorization header
+    const authHeader = req.headers.get("Authorization");
+
+    // Check if the Authorization header is present and starts with "Bearer "
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Authentication required.",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    // Extract the ID token from the Authorization header
+    const idToken = authHeader.split("Bearer ")[1];
+
+    let decodedToken;
+
+    // Verify the Firebase ID token from the Authorization header
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch (error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Invalid authentication token.",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+
+    // Get the authenticated user's ID from the decoded token
+    const authenticatedUserId = decodedToken.uid;
+
+    // Check if the authenticated user ID matches the user ID in the request body
     const {
       reference,
-      userId,
       email,
       customer,
       items,
@@ -46,11 +93,9 @@ export default async (req: Request) => {
       shipping,
       total,
     } = body;
-
     // Check if payment reference is provided
     if (
       !reference ||
-      !userId ||
       !email ||
       !customer ||
       !items ||
@@ -257,7 +302,6 @@ export default async (req: Request) => {
 
       // Create the order
       transactionRef.set(orderRef, {
-        userId,
         email,
 
         customer,
