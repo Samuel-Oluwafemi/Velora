@@ -184,7 +184,7 @@ export function CheckoutPage({
                   Authorization: `Bearer ${idToken}`,
                 },
                 body: JSON.stringify({
-                  reference: transaction.reference,
+                  items: cartItems,
 
                   email: form.email,
 
@@ -192,8 +192,6 @@ export function CheckoutPage({
                     firstName: form.firstName,
                     lastName: form.lastName,
                   },
-
-                  items: cartItems,
 
                   shippingAddress: {
                     address: form.address,
