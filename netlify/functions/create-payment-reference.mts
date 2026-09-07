@@ -63,7 +63,7 @@ export default async (req: Request) => {
     // Read request body
     const body = await req.json();
 
-    const { items } = body;
+    const { items, email, customer, shippingAddress } = body;
 
     // Validate cart
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -136,6 +136,18 @@ export default async (req: Request) => {
         amount: verifiedTotal * 100,
         currency: "NGN",
         status: "pending",
+        email,
+        customer,
+        shippingAddress,
+        items: items.map((item: any, index: number) => {
+          const productData = productDocs[index].data();
+
+          return {
+            productId: productData.id,
+            quantity: item.quantity,
+            size: item.size,
+          };
+        }),
         createdAt: new Date(),
       });
 
