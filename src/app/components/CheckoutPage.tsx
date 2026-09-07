@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { auth } from "../firebase";
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  createOrder,
-  createPaymentReference,
-} from "../../services/orderService";
 import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -109,15 +105,42 @@ export function CheckoutPage({
         throw new Error("Paystack public key is missing.");
       }
 
-      // Create the Paystack reference once
-      const reference = `VELORA-${Date.now()}`;
+      // Get the Firebase ID token
+      const firebaseUser = auth.currentUser;
 
-      // Save the expected payment before opening Paystack
-      await createPaymentReference({
-        reference,
-        userId: user.uid,
-        amount: total * 100,
-      });
+      if (!firebaseUser) {
+        throw new Error("User is not authenticated.");
+      }
+
+      const idToken = await firebaseUser.getIdToken();
+
+      // Ask the backend to create the payment reference
+      // and calculate the trusted payment amount.
+      const paymentReferenceResponse = await fetch(
+        "/.netlify/functions/create-payment-reference",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            items: cartItems,
+          }),
+        },
+      );
+
+      const paymentReferenceData = await paymentReferenceResponse.json();
+
+      if (!paymentReferenceResponse.ok || !paymentReferenceData.success) {
+        throw new Error(
+          paymentReferenceData.message || "Could not create payment reference.",
+        );
+      }
+
+      // These values now come from our backend
+      const reference = paymentReferenceData.reference;
+      const amount = paymentReferenceData.amount;
 
       const paystack = new Paystack();
 
@@ -126,7 +149,8 @@ export function CheckoutPage({
 
         email: form.email,
 
-        amount: total * 100,
+        // Use the amount calculated by the backend
+        amount,
 
         currency: "NGN",
 
@@ -134,7 +158,7 @@ export function CheckoutPage({
 
         lastName: form.lastName,
 
-        // Use the SAME reference saved in Firestore
+        // Use the reference created by the backend
         reference,
 
         onSuccess: async (transaction) => {
@@ -162,7 +186,6 @@ export function CheckoutPage({
                 body: JSON.stringify({
                   reference: transaction.reference,
 
-                  userId: user.uid,
                   email: form.email,
 
                   customer: {
@@ -178,10 +201,6 @@ export function CheckoutPage({
                     postcode: form.postcode,
                     country: form.country,
                   },
-
-                  subtotal,
-                  shipping,
-                  total,
                 }),
               },
             );
