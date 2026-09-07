@@ -126,6 +126,17 @@ export function CheckoutPage({
           },
           body: JSON.stringify({
             items: cartItems,
+            email: form.email,
+            customer: {
+              firstName: form.firstName,
+              lastName: form.lastName,
+            },
+            shippingAddress: {
+              address: form.address,
+              city: form.city,
+              postcode: form.postcode,
+              country: form.country,
+            },
           }),
         },
       );
