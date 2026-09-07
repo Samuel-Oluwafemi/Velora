@@ -200,7 +200,7 @@ export default function AccountDashboard() {
                       fontSize: "0.8rem",
                     }}
                   >
-                    €{order.total}
+                    ₦{order.total}
                   </p>
                 </div>
               </div>
