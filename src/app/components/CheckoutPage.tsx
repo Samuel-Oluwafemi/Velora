@@ -41,7 +41,7 @@ export function CheckoutPage({
     (s, i) => s + i.product.price * i.quantity,
     0,
   );
-  const shipping = subtotal > 300000 ? 0 : 12000;
+  const shipping = subtotal >= 50000 ? 0 : 3000;
   const total = subtotal + shipping;
 
   const update = (k: string, v: string) => {
