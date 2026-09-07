@@ -83,27 +83,9 @@ export default async (req: Request) => {
     const authenticatedUserId = decodedToken.uid;
 
     // Check if the authenticated user ID matches the user ID in the request body
-    const {
-      reference,
-      email,
-      customer,
-      items,
-      shippingAddress,
-      subtotal,
-      shipping,
-      total,
-    } = body;
+    const { reference, email, customer, items, shippingAddress } = body;
     // Check if payment reference is provided
-    if (
-      !reference ||
-      !email ||
-      !customer ||
-      !items ||
-      !shippingAddress ||
-      subtotal === undefined ||
-      shipping === undefined ||
-      total === undefined
-    ) {
+    if (!reference || !email || !customer || !items || !shippingAddress) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -230,11 +212,12 @@ export default async (req: Request) => {
     if (paymentReference.status === "verified") {
       return new Response(
         JSON.stringify({
-          success: false,
-          message: "This payment has already been processed.",
+          success: true,
+          message: "Payment has already been processed.",
+          orderId: paymentReference.orderId || null,
         }),
         {
-          status: 400,
+          status: 200,
           headers: {
             "Content-Type": "application/json",
           },
@@ -357,13 +340,14 @@ export default async (req: Request) => {
       );
     }
 
-    const orderRef = adminDb.collection("orders").doc();
+    const orderRef = adminDb.collection("orders").doc(reference);
 
-    // Use a transaction to ensure atomicity of the payment verification and order creation
+    // Use a transaction to atomically verify the payment
+    // and create the order.
     await adminDb.runTransaction(async (transactionRef) => {
       const paymentDoc = await transactionRef.get(paymentReferenceRef);
 
-      // Check if the payment reference document exists
+      // Check if the payment reference still exists
       if (!paymentDoc.exists) {
         throw new Error("Payment reference not found.");
       }
@@ -374,19 +358,28 @@ export default async (req: Request) => {
         throw new Error("Payment reference data is missing.");
       }
 
-      if (paymentData.status !== "pending") {
-        throw new Error("This payment has already been processed.");
+      // If this payment has already been processed,
+      // do not create another order.
+      if (paymentData.status === "verified") {
+        return;
       }
 
-      // Mark payment as verified
+      if (paymentData.status !== "pending") {
+        throw new Error("Invalid payment reference status.");
+      }
+
+      // Mark payment as verified and remember the order ID.
       transactionRef.update(paymentReferenceRef, {
         status: "verified",
         transactionId: transaction.id,
         verifiedAt: new Date(),
+        orderId: orderRef.id,
       });
 
-      // Create the order
+      // Create the order.
       transactionRef.set(orderRef, {
+        userId: authenticatedUserId,
+
         email,
 
         customer,
