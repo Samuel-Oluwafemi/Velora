@@ -1,6 +1,7 @@
 import { adminDb, adminAuth } from "../functions/firebase-admin.mjs";
 
 export default async (req: Request) => {
+  // Only allow POST requests
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({
@@ -17,7 +18,7 @@ export default async (req: Request) => {
   }
 
   try {
-    // Check for Authorization header
+    // Get Firebase ID token
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
@@ -35,10 +36,9 @@ export default async (req: Request) => {
       );
     }
 
-    // Extract the Firebase ID token
     const idToken = authHeader.split("Bearer ")[1];
 
-    // Verify the Firebase ID token
+    // Verify the Firebase user
     let decodedToken;
 
     try {
@@ -58,13 +58,14 @@ export default async (req: Request) => {
       );
     }
 
-    // Get the authenticated user's ID
     const authenticatedUserId = decodedToken.uid;
 
+    // Read request body
     const body = await req.json();
 
     const { items } = body;
 
+    // Validate cart
     if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(
         JSON.stringify({
@@ -80,7 +81,7 @@ export default async (req: Request) => {
       );
     }
 
-    // Fetch trusted product documents from Firestore
+    // Get trusted products from Firestore
     const productRefs = items.map((item: any) =>
       adminDb.collection("products").doc(item.product.id),
     );
@@ -89,7 +90,7 @@ export default async (req: Request) => {
       productRefs.map((ref: any) => ref.get()),
     );
 
-    // Check that every product exists
+    // Make sure every product exists
     for (const productDoc of productDocs) {
       if (!productDoc.exists) {
         return new Response(
@@ -107,7 +108,7 @@ export default async (req: Request) => {
       }
     }
 
-    // Calculate subtotal using trusted Firestore prices
+    // Calculate subtotal using Firestore prices
     const verifiedSubtotal = items.reduce(
       (sum: number, item: any, index: number) => {
         const productData = productDocs[index].data();
@@ -120,13 +121,13 @@ export default async (req: Request) => {
     // Calculate shipping on the server
     const verifiedShipping = verifiedSubtotal >= 50000 ? 0 : 3000;
 
-    // Calculate total on the server
+    // Calculate final total
     const verifiedTotal = verifiedSubtotal + verifiedShipping;
 
-    // Generate the payment reference on the server
+    // Generate payment reference
     const reference = `VELORA-${Date.now()}`;
 
-    // Store the trusted payment amount
+    // Save payment reference
     await adminDb
       .collection("paymentReferences")
       .doc(reference)
@@ -138,6 +139,7 @@ export default async (req: Request) => {
         createdAt: new Date(),
       });
 
+    // Send reference + trusted amount back to frontend
     return new Response(
       JSON.stringify({
         success: true,
