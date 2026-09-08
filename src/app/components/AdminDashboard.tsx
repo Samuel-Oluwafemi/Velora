@@ -938,29 +938,30 @@ export function AdminDashboard() {
                 className="bg-secondary overflow-hidden"
                 style={{ border: "1px solid #E5E7EB" }}
               >
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      {[
-                        "Name",
-                        "Email",
-                        "Orders",
-                        "Total Spend",
-                        "Member Since",
-                      ].map((header) => (
-                        <th
-                          key={header}
-                          className="text-left px-6 py-3 text-muted-foreground"
-                          style={labelStyle}
-                        >
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {customers.length ? (
-                      customers.map((customer, index) => {
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px]">
+                    <thead>
+                      <tr>
+                        {[
+                          "Name",
+                          "Email",
+                          "Orders",
+                          "Total Spend",
+                          "Member Since",
+                        ].map((header) => (
+                          <th
+                            key={header}
+                            className="text-left px-6 py-3 text-muted-foreground"
+                            style={labelStyle}
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.length ? (
+                        customers.map((customer, index) => {
                         const customerOrders = orders.filter(
                           (order) => order.userId === customer.id,
                         );
@@ -1013,16 +1014,17 @@ export function AdminDashboard() {
                             </td>
                           </tr>
                         );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan={5}>
-                          <EmptyState>No customers found.</EmptyState>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan={5}>
+                            <EmptyState>No customers found.</EmptyState>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
