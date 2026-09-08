@@ -105,19 +105,49 @@ export default async (req: Request) => {
       ...orderDocument.data(),
     }));
 
-    // 5. Get all users
+    // 5. Get all users and normalize non-admin customer records.
     const usersSnapshot = await adminDb.collection("users").get();
 
-    const customers = usersSnapshot.docs
-      .map(
-        (
-          userDocument,
-        ): Record<string, unknown> & { id: string; role?: string } => ({
-          id: userDocument.id,
-          ...userDocument.data(),
-        }),
-      )
-      .filter((user) => user.role !== "admin");
+    const customersByKey = new Map<string, Record<string, unknown>>();
+
+    usersSnapshot.docs.forEach((userDocument) => {
+      const data = userDocument.data();
+      if (data.role === "admin") return;
+
+      const name =
+        data.name ||
+        [data.firstname, data.lastname].filter(Boolean).join(" ") ||
+        "Unnamed customer";
+
+      customersByKey.set(userDocument.id, {
+        id: userDocument.id,
+        ...data,
+        name,
+        joined: data.createdAt ?? null,
+      });
+    });
+
+    // Older orders may exist without a matching users/{uid} document.
+    // Include those buyers so the admin customer view reflects actual orders.
+    orders.forEach((order) => {
+      const orderData = order as Record<string, any>;
+      const customer = orderData.customer ?? {};
+      const key = orderData.userId || orderData.email;
+      if (!key || customersByKey.has(key)) return;
+
+      customersByKey.set(key, {
+        id: key,
+        name:
+          [customer.firstName, customer.lastName].filter(Boolean).join(" ") ||
+          "Unnamed customer",
+        email: orderData.email ?? "—",
+        role: "customer",
+        joined: orderData.createdAt ?? null,
+        derivedFromOrder: true,
+      });
+    });
+
+    const customers = [...customersByKey.values()];
 
     // 6. Return dashboard data
     return new Response(
