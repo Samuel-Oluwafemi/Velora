@@ -32,6 +32,7 @@ import type { Order } from "../../services/orderService";
 import { getProducts } from "../../services/productService";
 import type { Product } from "./store";
 import { OrderFilters, type OrderSort } from "./admin/OrderFilters";
+import { CountUp, Reveal } from "./Motion";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#C8B38E",
@@ -474,43 +475,49 @@ export function AdminDashboard() {
         </div>
         <div className="p-6 md:p-8">
           {activeSection === "dashboard" && (
-            <div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Reveal className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  ["Total Revenue", formatNaira(totalRevenue)],
-                  ["Total Orders", orders.length.toString()],
-                  ["Avg. Order Value", formatNaira(Math.round(averageOrder))],
-                  ["Pending Orders", pendingOrders.toString()],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="bg-secondary p-5"
-                    style={{ border: "1px solid #E5E7EB" }}
-                  >
-                    <p
-                      className="text-muted-foreground mb-2"
-                      style={labelStyle}
-                    >
-                      {label}
-                    </p>
-                    <p
-                      className="text-foreground"
-                      style={{ ...headingStyle, fontSize: "1.7rem" }}
-                    >
-                      {value}
-                    </p>
+                  { label: "Total Revenue", value: totalRevenue, prefix: "₦" },
+                  { label: "Total Orders", value: orders.length },
+                  {
+                    label: "Avg. Order Value",
+                    value: Math.round(averageOrder),
+                    prefix: "₦",
+                  },
+                  { label: "Pending Orders", value: pendingOrders },
+                ].map((kpi, index) => (
+                  <Reveal key={kpi.label} delay={index * 0.08}>
                     <div
-                      className="flex items-center gap-1 mt-2 text-muted-foreground"
-                      style={{ fontSize: "0.72rem" }}
+                      className="group bg-secondary p-5 transition-colors duration-300 hover:border-accent"
+                      style={{ border: "1px solid #E5E7EB" }}
                     >
-                      <ArrowUpRight size={12} />
-                      Live Firestore data
+                      <p
+                        className="text-muted-foreground mb-2"
+                        style={labelStyle}
+                      >
+                        {kpi.label}
+                      </p>
+                      <p
+                        className="text-foreground"
+                        style={{ ...headingStyle, fontSize: "1.7rem" }}
+                      >
+                        {kpi.prefix}
+                        <CountUp value={kpi.value} />
+                      </p>
+                      <div
+                        className="flex items-center gap-1 mt-2 text-muted-foreground"
+                        style={{ fontSize: "0.72rem" }}
+                      >
+                        <ArrowUpRight size={12} />
+                        Live Firestore data
+                      </div>
                     </div>
-                  </div>
+                  </Reveal>
                 ))}
               </div>
               <div
-                className="bg-secondary p-6 mb-6"
+                className="bg-secondary p-6"
                 style={{ border: "1px solid #E5E7EB" }}
               >
                 <div className="flex items-center gap-2 mb-6">
@@ -552,49 +559,51 @@ export function AdminDashboard() {
                   <EmptyState>No paid orders yet.</EmptyState>
                 )}
               </div>
-              <div
-                className="bg-secondary"
-                style={{ border: "1px solid #E5E7EB" }}
-              >
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                  <p style={{ ...headingStyle, fontSize: "1.05rem" }}>
-                    Recent Orders
-                  </p>
-                  <button
-                    onClick={() => setActiveSection("orders")}
-                    className="text-muted-foreground"
-                    style={labelStyle}
-                  >
-                    View All
-                  </button>
+              <Reveal delay={0.18}>
+                <div
+                  className="bg-secondary"
+                  style={{ border: "1px solid #E5E7EB" }}
+                >
+                  <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                    <p style={{ ...headingStyle, fontSize: "1.05rem" }}>
+                      Recent Orders
+                    </p>
+                    <button
+                      onClick={() => setActiveSection("orders")}
+                      className="text-muted-foreground"
+                      style={labelStyle}
+                    >
+                      View All
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          {[
+                            "Order",
+                            "Customer",
+                            "Product",
+                            "Date",
+                            "Status",
+                            "Total",
+                          ].map((header) => (
+                            <th
+                              key={header}
+                              className="text-left px-6 py-3 text-muted-foreground"
+                              style={labelStyle}
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>{renderOrderRows(recentOrders)}</tbody>
+                    </table>
+                  </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr>
-                        {[
-                          "Order",
-                          "Customer",
-                          "Product",
-                          "Date",
-                          "Status",
-                          "Total",
-                        ].map((header) => (
-                          <th
-                            key={header}
-                            className="text-left px-6 py-3 text-muted-foreground"
-                            style={labelStyle}
-                          >
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>{renderOrderRows(recentOrders)}</tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+              </Reveal>
+            </Reveal>
           )}
 
           {activeSection === "products" && (

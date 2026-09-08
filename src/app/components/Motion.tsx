@@ -1,7 +1,15 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 
-export function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+export function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
   return (
     <motion.div
       className={className}
@@ -13,4 +21,33 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
       {children}
     </motion.div>
   );
+}
+
+export function CountUp({
+  value,
+  format = (amount) => amount.toLocaleString("en-NG"),
+  duration = 1100,
+}: {
+  value: number;
+  format?: (value: number) => string;
+  duration?: number;
+}) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let frame = 0;
+    const startedAt = performance.now();
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(value * eased);
+      if (progress < 1) frame = requestAnimationFrame(animate);
+    };
+
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [duration, value]);
+
+  return <>{format(Math.round(displayValue))}</>;
 }
