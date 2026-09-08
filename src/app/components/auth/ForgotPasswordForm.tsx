@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Loader } from "lucide-react";
+import { Reveal } from "../Motion";
 
 // ForgotPasswordForm is a React component that provides a form for users to request a password reset email. It uses the useAuth hook to access authentication methods and state, including the resetPassword function and loading state. The component manages local state for the email input, success message, and error messages. When the form is submitted, it attempts to send a password reset email and displays appropriate feedback to the user.
 export default function ForgotPasswordForm({
@@ -26,19 +27,21 @@ export default function ForgotPasswordForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {message && <div className="text-sm text-green-600">{message}</div>}
-      {localError && <div className="text-sm text-red-600">{localError}</div>}
+    <Reveal>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <p className="mb-2 text-center text-sm leading-6 text-muted-foreground">Enter the email attached to your account and we will send a secure reset link.</p>
+      {message && <div className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">{message}</div>}
+      {localError && <div className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{localError}</div>}
       {/* Email */}
       <div>
-        <label className="block text-muted-foreground mb-2">Email</label>
+        <label className="mb-2 block text-xs uppercase tracking-[0.12em] text-muted-foreground">Email address</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           placeholder="you@example.com"
-          className="w-full px-4 py-3 border border-border bg-background text-foreground"
+          className="w-full border border-border bg-background px-4 py-3.5 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-accent"
         />
       </div>
 
@@ -46,9 +49,7 @@ export default function ForgotPasswordForm({
       <button
         type="submit"
         disabled={resetPasswordLoading}
-        className="w-full py-3.5 bg-foreground text-primary-foreground hover:bg-black focus:outline-none 
-        focus:ring-2 focus:ring-black focus:ring-offset-2 transition duration-200 cursor-pointer
-        disabled:bg-gray-400 disabled:cursor-not-allowed flex justify-center gap-2 items-center"
+        className="flex w-full cursor-pointer items-center justify-center gap-2 bg-foreground py-3.5 text-xs uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         {resetPasswordLoading ? (
           <>
@@ -61,15 +62,16 @@ export default function ForgotPasswordForm({
       </button>
 
       {/* Back to sign in */}
-      <div className="mt-4 text-center text-sm">
+      <div className="mt-4 text-center text-sm text-muted-foreground">
         <button
           type="button"
           onClick={() => onSwitch("signin")}
-          className="underline hover:text-blue-700 cursor-pointer"
+          className="text-foreground underline underline-offset-4 transition-colors hover:text-accent"
         >
           Back to Sign In
         </button>
       </div>
     </form>
+    </Reveal>
   );
 }

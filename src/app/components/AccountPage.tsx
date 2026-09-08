@@ -6,6 +6,7 @@ import SignInForm from "./auth/SignInForm";
 import SignUpForm from "./auth/SignUpForm";
 import ForgotPasswordForm from "./auth/ForgotPasswordForm";
 import AccountDashboard from "./auth/AccountDashboard";
+import { Reveal } from "./Motion";
 
 export function AccountPage({
   onNavigate,
@@ -31,8 +32,9 @@ export function AccountPage({
   }
 
   return (
-    <div className="bg-background min-h-screen flex items-center justify-center px-6 pt-5 md:pt-20 pb-2 md:pb-10">
-      <div className="w-full max-w-sm">
+    <div className="bg-background min-h-screen flex items-center justify-center px-5 py-28 md:px-10 md:py-36">
+      <Reveal className={user ? "w-full max-w-4xl" : "w-full max-w-md"}>
+        <div className={user ? "" : "border border-border bg-card p-7 shadow-[0_18px_50px_rgba(26,26,26,0.06)] md:p-10"}>
         <h1
           className="text-foreground mb-8 mt-9 md:mt-0 text-center"
           style={{
@@ -49,6 +51,8 @@ export function AccountPage({
                 ? "Reset Password"
                 : "Sign In"}
         </h1>
+
+        {!user && <p className="mb-8 text-center text-sm leading-6 text-muted-foreground">A quieter way to keep track of your orders, saved details, and everyday essentials.</p>}
 
         {user ? (
           <AccountDashboard />
@@ -105,7 +109,8 @@ export function AccountPage({
             {view === "forgot" && <ForgotPasswordForm onSwitch={setView} />}
           </div>
         )}
-      </div>
+        </div>
+      </Reveal>
     </div>
   );
 }

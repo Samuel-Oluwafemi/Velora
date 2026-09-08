@@ -5,6 +5,7 @@ import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import Paystack from "@paystack/inline-js";
+import { Reveal } from "./Motion";
 
 // Props for the CheckoutPage component
 interface CheckoutPageProps {
@@ -262,7 +263,7 @@ export function CheckoutPage({
   };
 
   const inputClass =
-    "w-full px-4 py-3 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
+    "w-full px-4 py-3.5 border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
   const inputStyle = { fontFamily: "'Inter', sans-serif", fontSize: "0.85rem" };
   const labelStyle = {
     fontFamily: "'Inter', sans-serif",
@@ -436,7 +437,7 @@ export function CheckoutPage({
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
+        <Reveal className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16 items-start">
           {/* Form */}
           <div className="lg:col-span-3">
             {/* Step 0: Contact */}
@@ -770,7 +771,7 @@ export function CheckoutPage({
 
           {/* Order summary */}
           <div className="lg:col-span-2">
-            <div className="bg-secondary p-6 sticky top-24">
+            <div className="bg-secondary p-6 md:p-7 sticky top-24 border border-border">
               <h3
                 className="text-foreground mb-5 pb-4 border-b border-border"
                 style={{
@@ -825,7 +826,7 @@ export function CheckoutPage({
                         fontSize: "0.8rem",
                       }}
                     >
-                      ₦{(item.product.price * item.quantity).toLocaleString()}
+                      ₦{(item.product.price * item.quantity).toLocaleString("en-NG")}
                     </p>
                   </div>
                 ))}
@@ -849,7 +850,7 @@ export function CheckoutPage({
                       fontSize: "0.8rem",
                     }}
                   >
-                    ₦{subtotal}
+                    ₦{subtotal.toLocaleString("en-NG")}
                   </span>
                 </div>
                 {/* Shipping */}
@@ -870,7 +871,7 @@ export function CheckoutPage({
                       fontSize: "0.8rem",
                     }}
                   >
-                    {shipping === 0 ? "Free" : `₦${shipping}`}
+                    {shipping === 0 ? "Free" : `₦${shipping.toLocaleString("en-NG")}`}
                   </span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-border mt-2">
@@ -896,7 +897,7 @@ export function CheckoutPage({
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, Plus, Minus } from "lucide-react";
+import { Reveal } from "./Motion";
 
 interface ProductDetailPageProps {
   productId: string;
@@ -61,11 +62,11 @@ export function ProductDetailPage({
         </button>
 
         {/* Main layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 mb-24">
           {/* Images */}
-          <div className="flex gap-3">
+          <Reveal className="flex gap-3">
             {/* Thumbnails */}
-            <div className="flex flex-col gap-2.5 w-16 flex-shrink-0">
+            <div className="flex flex-row md:flex-col gap-2.5 w-16 md:w-16 flex-shrink-0">
               {product.images.map((img, i) => (
                 <button
                   key={i}
@@ -98,10 +99,10 @@ export function ProductDetailPage({
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
             </div>
-          </div>
+          </Reveal>
 
           {/* Details */}
-          <div className="flex flex-col justify-start pt-2 md:pt-6">
+          <Reveal delay={0.1} className="flex flex-col justify-start pt-2 md:pt-6">
             {product.tag && (
               <span
                 className="self-start px-3 py-1 mb-4 bg-foreground text-primary-foreground"
@@ -141,7 +142,7 @@ export function ProductDetailPage({
                 letterSpacing: "0.04em",
               }}
             >
-              ₦{product.price}
+              ₦{product.price.toLocaleString("en-NG")}
             </p>
 
             {/* Description */}
@@ -297,12 +298,12 @@ export function ProductDetailPage({
                 {product.material}
               </p>
             </div>
-          </div>
+          </Reveal>
         </div>
 
         {/* Related products */}
         {(related.length > 0 || fallbackRelated.length > 0) && (
-          <div className="border-t border-border pt-14 pb-20">
+          <Reveal className="border-t border-border pt-14 pb-20">
             <h2
               className="text-foreground mb-10"
               style={{
@@ -322,7 +323,7 @@ export function ProductDetailPage({
                 />
               ))}
             </div>
-          </div>
+          </Reveal>
         )}
       </div>
 

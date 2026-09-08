@@ -3,6 +3,7 @@ import { PRODUCTS, CATEGORIES } from "./store";
 import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
 import { SlidersHorizontal, X } from "lucide-react";
+import { Reveal } from "./Motion";
 
 interface ShopPageProps {
   onNavigate: (page: string, productId?: string) => void;
@@ -24,7 +25,7 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
   return (
     <div className="bg-background min-h-screen">
       {/* Page header */}
-      <div className="pt-28 md:pt-36 pb-10 border-b border-border px-6 md:px-12 max-w-screen-xl mx-auto">
+      <div className="pt-32 md:pt-40 pb-12 border-b border-border px-6 md:px-12 max-w-screen-xl mx-auto">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-2"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -39,13 +40,13 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
             fontWeight: 300,
           }}
         >
-          All Products
+          The collection
         </h1>
       </div>
 
       <div className="max-w-screen-xl mx-auto px-6 md:px-12">
         {/* Filters bar */}
-        <div className="flex items-center justify-between py-5 border-b border-border gap-4">
+        <div className="flex items-center justify-between py-5 border-b border-border gap-4 sticky top-[4.5rem] md:top-20 z-20 bg-background/95 backdrop-blur-sm">
           {/* Category pills — desktop */}
           <div className="hidden md:flex items-center gap-1 flex-wrap">
             {CATEGORIES.map((cat) => (
@@ -165,7 +166,7 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
 
         {/* Count */}
         <p
-          className="text-muted-foreground py-5"
+          className="text-muted-foreground py-6"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.78rem" }}
         >
           {filtered.length} {filtered.length === 1 ? "product" : "products"}
@@ -173,12 +174,10 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
 
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-7 pb-24">
-          {filtered.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onClick={() => onNavigate("product", product.id)}
-            />
+          {filtered.map((product, index) => (
+            <Reveal key={product.id} delay={Math.min(index * 0.04, 0.2)}>
+              <ProductCard product={product} onClick={() => onNavigate("product", product.id)} />
+            </Reveal>
           ))}
         </div>
       </div>

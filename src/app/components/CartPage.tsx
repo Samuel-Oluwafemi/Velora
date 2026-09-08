@@ -2,6 +2,7 @@ import { CartItem } from "./store";
 import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { X, Plus, Minus } from "lucide-react";
+import { Reveal } from "./Motion";
 
 interface CartPageProps {
   cartItems: CartItem[];
@@ -28,7 +29,7 @@ export function CartPage({
   if (cartItems.length === 0) {
     return (
       <div className="bg-background min-h-screen flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center pt-24">
+        <Reveal className="flex-1 flex flex-col items-center justify-center px-6 text-center pt-24">
           <p
             className="text-muted-foreground uppercase tracking-[0.2em] mb-3"
             style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -68,7 +69,7 @@ export function CartPage({
           >
             Browse Collection
           </button>
-        </div>
+        </Reveal>
         <Footer onNavigate={onNavigate} />
       </div>
     );
@@ -76,7 +77,7 @@ export function CartPage({
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 pt-28 md:pt-36 pb-24">
+      <Reveal className="max-w-screen-xl mx-auto px-6 md:px-12 pt-28 md:pt-36 pb-24">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-2"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -98,7 +99,8 @@ export function CartPage({
           {/* Cart items */}
           <div className="lg:col-span-2">
             <div className="border-t border-border">
-              {cartItems.map((item) => (
+              {cartItems.map((item, index) => (
+                <Reveal key={`${item.product.id}-${item.size}`} delay={Math.min(index * 0.06, 0.24)}>
                 <div
                   key={`${item.product.id}-${item.size}`}
                   className="flex gap-5 py-7 border-b border-border"
@@ -198,11 +200,12 @@ export function CartPage({
                           fontWeight: 400,
                         }}
                       >
-                        ₦{(item.product.price * item.quantity).toLocaleString()} 
+                        ₦{(item.product.price * item.quantity).toLocaleString("en-NG")} 
                       </p>
                     </div>
                   </div>
                 </div>
+                </Reveal>
               ))}
             </div>
 
@@ -224,7 +227,7 @@ export function CartPage({
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-secondary p-7 sticky top-24">
+            <div className="bg-secondary p-7 sticky top-24 border border-border">
               <h2
                 className="text-foreground mb-7 pb-5 border-b border-border"
                 style={{
@@ -254,7 +257,7 @@ export function CartPage({
                       fontSize: "0.82rem",
                     }}
                   >
-                    ₦{subtotal.toLocaleString()}
+                    ₦{subtotal.toLocaleString("en-NG")}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -274,7 +277,7 @@ export function CartPage({
                       fontSize: "0.82rem",
                     }}
                   >
-                    ₦{shipping === 0 ? "Free" : `${shipping.toLocaleString()}`}
+                    {shipping === 0 ? "Free" : `₦${shipping.toLocaleString("en-NG")}`}
                   </span>
                 </div>
                 {shipping > 0 && (
@@ -310,7 +313,7 @@ export function CartPage({
                       fontWeight: 400,
                     }}
                   >
-                    ₦{total.toLocaleString()}
+                    ₦{total.toLocaleString("en-NG")}
                   </span>
                 </div>
                 <p
@@ -357,7 +360,7 @@ export function CartPage({
             </div>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       <Footer onNavigate={onNavigate} />
     </div>

@@ -27,7 +27,7 @@ export function Footer({ onNavigate }: FooterProps) {
                 maxWidth: "18ch",
               }}
             >
-              Designed with intention. Made to last.
+              Considered pieces for the life you are already living.
             </p>
           </div>
 
@@ -40,11 +40,11 @@ export function Footer({ onNavigate }: FooterProps) {
               Shop
             </p>
             {[
-              "New Arrivals",
-              "All Products",
+              "New arrivals",
+              "The collection",
               "Outerwear",
-              "Knitwear",
-              "Dresses",
+              "Tops",
+              "Trousers",
             ].map((item) => (
               <button
                 key={item}
@@ -91,12 +91,7 @@ export function Footer({ onNavigate }: FooterProps) {
             >
               Support
             </p>
-            {[
-              "Shipping & Returns",
-              "Size Guide",
-              "Care Instructions",
-              "Contact",
-            ].map((item) => (
+            {["Shipping & returns", "Size guide", "Care instructions", "Contact"].map((item) => (
               <p
                 key={item}
                 className="block text-primary-foreground/70 mb-2.5"

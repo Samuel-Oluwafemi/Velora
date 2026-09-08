@@ -6,6 +6,7 @@ import Image from "../../assets/images/Versatile Style Power.jpg";
 import featuredImg from "../../assets/images/Collection.jpg";
 import featuredImg1 from "../../assets/images/Relaxed.png";
 import { FAQs } from "./FAQs";
+import { Reveal } from "./Motion";
 interface HomePageProps {
   onNavigate: (page: string, productId?: string) => void;
 }
@@ -16,12 +17,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
   return (
     <div className="bg-background min-h-screen">
       {/* HERO */}
-      <section className="relative w- full overflow-hidden md:h-[133svh] h-[110svh] min-h-[600px] max-h-[1000px]">
+      <section className="relative min-h-[680px] overflow-hidden md:h-[calc(100svh-5rem)] md:min-h-[720px]">
         <img
           src={heroImage}
-          style={{ minHeight: "1000px" }}
+          style={{ minHeight: "680px" }}
           alt="VELORA hero"
-          className="absolute inset-0 w-full h-200 md:h-full object-cover object-top"
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
         {/* Overlay */}
         <div
@@ -32,15 +33,18 @@ export function HomePage({ onNavigate }: HomePageProps) {
           }}
         />
 
-        <div className="absolute bottom-0 left-0 right-0 px-6 md:px-16 pb-66 md:pb-60">
+        <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 md:px-16 md:pb-16">
           <div className="max-w-screen-xl mx-auto">
-            <p
+            <Reveal>
+              <p
               className="text-primary-foreground/70 uppercase tracking-[0.2em] mb-4"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
             >
               Premium Fashion
-            </p>
-            <h1
+              </p>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <h1
               className="text-primary-foreground leading-none mb-5"
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
@@ -50,11 +54,13 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 lineHeight: 1.05,
               }}
             >
-              Timeless Essentials
+              Timeless essentials
               <br />
               for Modern Living.
-            </h1>
-            <p
+              </h1>
+            </Reveal>
+            <Reveal delay={0.16}>
+              <p
               className="text-primary-foreground/75 mb-10"
               style={{
                 fontFamily: "'Inter', sans-serif",
@@ -64,11 +70,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
               }}
             >
               Designed with intention. Made to last.
-            </p>
-            <button
+              </p>
+            </Reveal>
+            <Reveal delay={0.24}>
+              <button
               onClick={() => onNavigate("shop")}
-              className="px-9 py-3.5 bg-primary-foreground text-foreground 
-              hover:bg-accent transition-colors duration-300 cursor-pointer"
+              className="px-8 py-3.5 bg-primary-foreground text-foreground hover:bg-accent transition-colors duration-300 cursor-pointer"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.75rem",
@@ -77,15 +84,17 @@ export function HomePage({ onNavigate }: HomePageProps) {
               }}
             >
               Explore Collection
-            </button>
+              </button>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* EDITORIAL STATEMENT */}
-      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-35">
+      <section className="max-w-screen-xl mx-auto px-6 py-20 md:px-12 md:py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <div>
+          <Reveal>
+            <div>
             <p
               className="text-muted-foreground uppercase tracking-[0.18em] mb-5"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -130,10 +139,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
             >
               Our Story
             </button>
-          </div>
-          <div className="relative">
+            </div>
+          </Reveal>
+          <Reveal delay={0.12}>
+            <div className="relative">
             <div
-              className="overflow-hidden rounded-xl"
+              className="overflow-hidden"
               style={{ minHeight: "400px", maxHeight: "500px" }}
             >
               <img
@@ -159,14 +170,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 2026
               </span>
             </div>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* FEATURED PRODUCTS */}
       <section className="max-w-screen-xl mx-auto px-6 md:px-12 pb-20">
-        <div className="flex items-end justify-between mb-10">
-          <div>
+        <Reveal>
+          <div className="flex items-end justify-between mb-10">
+            <div>
             <p
               className="text-muted-foreground uppercase tracking-[0.18em] mb-2"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -183,8 +196,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
             >
               New Arrivals
             </h2>
-          </div>
-          <button
+            </div>
+            <button
             onClick={() => onNavigate("shop")}
             className="hidden md:block text-foreground border-b border-foreground/30 
             pb-0.5 hover:border-accent hover:text-accent transition-colors cursor-pointer"
@@ -196,10 +209,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
             }}
           >
             View All
-          </button>
-        </div>
+            </button>
+          </div>
+        </Reveal>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-7">
+        <Reveal delay={0.1} className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-7">
           {featured.map((product) => (
             <ProductCard
               key={product.id}
@@ -207,7 +221,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               onClick={() => onNavigate("product", product.id)}
             />
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* EDITORIAL SPLIT — Two images */}
@@ -375,12 +389,12 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
+      <Reveal className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28">
         <FAQs />
-      </section>
+      </Reveal>
 
       {/* NEWSLETTER */}
-      <section className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28 text-center">
+      <Reveal className="max-w-screen-xl mx-auto px-6 md:px-12 py-20 md:py-28 text-center">
         <p
           className="text-muted-foreground uppercase tracking-[0.2em] mb-4"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
@@ -432,7 +446,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             Subscribe
           </button>
         </form>
-      </section>
+      </Reveal>
 
       <Footer onNavigate={onNavigate} />
     </div>

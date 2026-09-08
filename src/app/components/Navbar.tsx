@@ -32,11 +32,11 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         borderBottom: scrolled ? "1px solid #E5E7EB" : "1px solid transparent",
       }}
     >
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
+      <div className="max-w-screen-xl mx-auto px-5 md:px-12 flex items-center justify-between h-[4.5rem] md:h-20">
         {/* Logo */}
         <button
           onClick={() => onNavigate("home")}
-          className="text-foreground tracking-[0.25em] uppercase cursor-pointer "
+          className="text-foreground tracking-[0.25em] uppercase cursor-pointer transition-opacity hover:opacity-60"
           style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontSize: "1.15rem",
@@ -48,13 +48,12 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         </button>
 
         {/* Center Nav — desktop */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <button
               key={link.page}
               onClick={() => onNavigate(link.page)}
-              className="text-foreground/80 hover:text-foreground transition-colors cursor-pointer 
-              duration-200 hover:text-yellow-800/60"
+              className={`relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer duration-200 ${currentPage === link.page ? "text-foreground" : ""}`}
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.78rem",
@@ -63,6 +62,7 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
               }}
             >
               {link.label}
+              {currentPage === link.page && <span className="absolute -bottom-2 left-1/2 h-px w-1 -translate-x-1/2 bg-accent" />}
             </button>
           ))}
         </div>
@@ -71,8 +71,7 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
         <div className="flex items-center gap-5">
           <button
             onClick={() => onNavigate("account")}
-            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors 
-            cursor-pointer hover:text-yellow-800/60"
+            className="hidden md:flex text-foreground/70 hover:text-foreground transition-colors cursor-pointer"
             aria-label="Account"
           >
             <User size={18} strokeWidth={1.5} />
@@ -81,8 +80,7 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
           {/* Cart */}
           <button
             onClick={() => onNavigate("cart")}
-            className="relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer 
-            duration-200 hover:text-yellow-800/60"
+            className="relative text-foreground/70 hover:text-foreground transition-colors cursor-pointer duration-200"
             aria-label={`Cart (${cartCount} items)`}
           >
             <ShoppingBag size={18} strokeWidth={1.5} />
@@ -116,7 +114,7 @@ export function Navbar({ cartCount, onNavigate, currentPage }: NavbarProps) {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-background border-t border-border px-6 py-6 flex flex-col gap-5">
+        <div className="md:hidden bg-background/95 backdrop-blur-md border-t border-border px-5 py-7 flex flex-col gap-5 shadow-sm">
           {navLinks.map((link) => (
             <button
               key={link.page}

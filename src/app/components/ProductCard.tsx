@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Product } from "./store";
+import { motion } from "motion/react";
 interface ProductCardProps {
   product: Product;
   onClick: () => void;
@@ -10,8 +11,11 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div
-      className="cursor-pointer group"
+    <motion.button
+      type="button"
+      className="cursor-pointer group block w-full text-left"
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -29,6 +33,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           className="w-full h-full object-cover transition-transform duration-700"
           style={{ transform: hovered ? "scale(1.04)" : "scale(1)" }}
         />
+        <span className="absolute inset-x-0 bottom-0 translate-y-full bg-foreground px-4 py-3 text-center text-[0.65rem] uppercase tracking-[0.16em] text-primary-foreground transition-transform duration-300 group-hover:translate-y-0">View piece</span>
         {/* Tag */}
         {product.tag && (
           <span
@@ -77,9 +82,9 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             fontWeight: 400,
           }}
         >
-          ₦{product.price}
+          ₦{product.price.toLocaleString("en-NG")}
         </p>
       </div>
-    </div>
+    </motion.button>
   );
 }
