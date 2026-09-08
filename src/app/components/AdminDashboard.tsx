@@ -217,12 +217,8 @@ export function AdminDashboard() {
       { month: string; revenue: number; orders: number }
     >();
     paidOrders.forEach((order) => {
-      const value =
-        order.createdAt &&
-        typeof order.createdAt === "object" &&
-        "toDate" in order.createdAt
-          ? (order.createdAt as { toDate: () => Date }).toDate()
-          : new Date(order.createdAt as string);
+      const createdAt = timestampValue(order.createdAt);
+      const value = createdAt ? new Date(createdAt) : new Date(NaN);
       if (Number.isNaN(value.getTime())) return;
       const month = value.toLocaleDateString("en-US", { month: "short" });
       const entry = months.get(month) ?? { month, revenue: 0, orders: 0 };
