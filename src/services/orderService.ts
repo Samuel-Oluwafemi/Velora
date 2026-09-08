@@ -1,4 +1,4 @@
-import { getDocs, query, where, collection } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 import { db } from "../app/firebase";
 
@@ -62,4 +62,13 @@ export async function getUserOrders(userId: string) {
     id: doc.id,
     ...doc.data(),
   }));
+}
+
+export async function getAllOrders(): Promise<Order[]> {
+  const snapshot = await getDocs(collection(db, "orders"));
+
+  return snapshot.docs.map((orderDocument) => ({
+    id: orderDocument.id,
+    ...orderDocument.data(),
+  })) as Order[];
 }
