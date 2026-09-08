@@ -614,85 +614,87 @@ export function AdminDashboard() {
                 className="bg-secondary overflow-hidden"
                 style={{ border: "1px solid #E5E7EB" }}
               >
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      {["Product", "Category", "Price", "Sizes", "Tag"].map(
-                        (header) => (
-                          <th
-                            key={header}
-                            className="text-left px-6 py-3 text-muted-foreground"
-                            style={labelStyle}
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px]">
+                    <thead>
+                      <tr>
+                        {["Product", "Category", "Price", "Sizes", "Tag"].map(
+                          (header) => (
+                            <th
+                              key={header}
+                              className="text-left px-6 py-3 text-muted-foreground"
+                              style={labelStyle}
+                            >
+                              {header}
+                            </th>
+                          ),
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.length ? (
+                        products.map((product, index) => (
+                          <tr
+                            key={product.id}
+                            style={{
+                              borderBottom:
+                                index < products.length - 1
+                                  ? "1px solid #E5E7EB"
+                                  : "none",
+                            }}
                           >
-                            {header}
-                          </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.length ? (
-                      products.map((product, index) => (
-                        <tr
-                          key={product.id}
-                          style={{
-                            borderBottom:
-                              index < products.length - 1
-                                ? "1px solid #E5E7EB"
-                                : "none",
-                          }}
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              {product.images[0] ? (
-                                <img
-                                  src={product.images[0]}
-                                  alt={product.name}
-                                  className="w-10 h-12 object-cover"
-                                />
-                              ) : (
-                                <div className="w-10 h-12 bg-muted" />
-                              )}
-                              <span style={{ fontSize: "0.82rem" }}>
-                                {product.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td
-                            className="px-6 py-4 text-muted-foreground"
-                            style={{ fontSize: "0.8rem" }}
-                          >
-                            {product.category}
-                          </td>
-                          <td
-                            className="px-6 py-4"
-                            style={{ fontSize: "0.8rem" }}
-                          >
-                            {formatNaira(product.price)}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-muted-foreground"
-                            style={{ fontSize: "0.78rem" }}
-                          >
-                            {product.sizes.join(", ") || "—"}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-muted-foreground"
-                            style={{ fontSize: "0.8rem" }}
-                          >
-                            {product.tag || "—"}
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                {product.images[0] ? (
+                                  <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    className="w-10 h-12 object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-12 bg-muted" />
+                                )}
+                                <span style={{ fontSize: "0.82rem" }}>
+                                  {product.name}
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              className="px-6 py-4 text-muted-foreground"
+                              style={{ fontSize: "0.8rem" }}
+                            >
+                              {product.category}
+                            </td>
+                            <td
+                              className="px-6 py-4"
+                              style={{ fontSize: "0.8rem" }}
+                            >
+                              {formatNaira(product.price)}
+                            </td>
+                            <td
+                              className="px-6 py-4 text-muted-foreground"
+                              style={{ fontSize: "0.78rem" }}
+                            >
+                              {product.sizes.join(", ") || "—"}
+                            </td>
+                            <td
+                              className="px-6 py-4 text-muted-foreground"
+                              style={{ fontSize: "0.8rem" }}
+                            >
+                              {product.tag || "—"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5}>
+                            <EmptyState>No products found.</EmptyState>
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5}>
-                          <EmptyState>No products found.</EmptyState>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -962,58 +964,58 @@ export function AdminDashboard() {
                     <tbody>
                       {customers.length ? (
                         customers.map((customer, index) => {
-                        const customerOrders = orders.filter(
-                          (order) => order.userId === customer.id,
-                        );
-                        return (
-                          <tr
-                            key={customer.id}
-                            style={{
-                              borderBottom:
-                                index < customers.length - 1
-                                  ? "1px solid #E5E7EB"
-                                  : "none",
-                            }}
-                          >
-                            <td
-                              className="px-6 py-4"
-                              style={{ fontSize: "0.82rem" }}
+                          const customerOrders = orders.filter(
+                            (order) => order.userId === customer.id,
+                          );
+                          return (
+                            <tr
+                              key={customer.id}
+                              style={{
+                                borderBottom:
+                                  index < customers.length - 1
+                                    ? "1px solid #E5E7EB"
+                                    : "none",
+                              }}
                             >
-                              {customer.name}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-muted-foreground"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {customer.email}
-                            </td>
-                            <td
-                              className="px-6 py-4"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {customerOrders.length}
-                            </td>
-                            <td
-                              className="px-6 py-4"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {formatNaira(
-                                customerOrders
-                                  .filter(isPaid)
-                                  .reduce(
-                                    (sum, order) => sum + orderTotal(order),
-                                    0,
-                                  ),
-                              )}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-muted-foreground"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {formatDate(customer.joined)}
-                            </td>
-                          </tr>
-                        );
+                              <td
+                                className="px-6 py-4"
+                                style={{ fontSize: "0.82rem" }}
+                              >
+                                {customer.name}
+                              </td>
+                              <td
+                                className="px-6 py-4 text-muted-foreground"
+                                style={{ fontSize: "0.8rem" }}
+                              >
+                                {customer.email}
+                              </td>
+                              <td
+                                className="px-6 py-4"
+                                style={{ fontSize: "0.8rem" }}
+                              >
+                                {customerOrders.length}
+                              </td>
+                              <td
+                                className="px-6 py-4"
+                                style={{ fontSize: "0.8rem" }}
+                              >
+                                {formatNaira(
+                                  customerOrders
+                                    .filter(isPaid)
+                                    .reduce(
+                                      (sum, order) => sum + orderTotal(order),
+                                      0,
+                                    ),
+                                )}
+                              </td>
+                              <td
+                                className="px-6 py-4 text-muted-foreground"
+                                style={{ fontSize: "0.8rem" }}
+                              >
+                                {formatDate(customer.joined)}
+                              </td>
+                            </tr>
+                          );
                         })
                       ) : (
                         <tr>
