@@ -20,6 +20,7 @@ import { ProductDetailPage } from "./components/ProductDetailPage";
 import { CartPage } from "./components/CartPage";
 import { CheckoutPage } from "./components/CheckoutPage";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminRoute } from "./components/AdminRoute";
 import { Footer } from "./components/Footer";
 import { AccountPage } from "./components/AccountPage";
 import featuredImg1 from "../assets/images/Relaxed.png";
@@ -205,6 +206,14 @@ export default function App() {
       {toastMessage && <Toast message={toastMessage} />}
       <Routes>
         <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/"
           element={
             <PageLayout
@@ -262,27 +271,10 @@ export default function App() {
               />
             }
           />
-          <Route
-            path="admin"
-            element={<AdminDashboard onNavigate={navigateToPage} />}
-          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
 
-      <button
-        onClick={() => navigateToPage("admin")}
-        className="fixed bottom-5 right-5 z-50 px-4 py-2 bg-foreground text-primary-foreground 
-        hover:bg-accent hover:text-foreground transition-colors duration-200"
-        style={{
-          fontFamily: "'Inter', sans-serif",
-          fontSize: "0.68rem",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-        }}
-      >
-        Admin →
-      </button>
     </div>
   );
 }
