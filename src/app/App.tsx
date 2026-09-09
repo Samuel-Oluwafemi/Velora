@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Navigate,
   Outlet,
@@ -31,6 +31,19 @@ export default function App() {
 
   // 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (message: string) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    setToastMessage(message);
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+      toastTimerRef.current = null;
+    }, 3000);
+  };
 
   // checkout handler checks if the cart is empty or if the user is not logged in. If the cart is empty, it does nothing. If the user is not logged in, it navigates to the account page. Otherwise, it navigates to the checkout page.
   const handleCheckout = () => {
@@ -75,7 +88,7 @@ export default function App() {
     return;
   }
 
-  setToastMessage(state.toast);
+  showToast(state.toast);
 
   const timer = setTimeout(() => {
     setToastMessage(null);
@@ -118,6 +131,8 @@ export default function App() {
 
   // Cart management functions for adding, updating, and removing items
   const addToCart = (item: CartItem) => {
+    showToast(`${item.product.name} added to your bag`);
+
     setCartItems((prev) => {
       const existing = prev.find(
         (i) => i.product.id === item.product.id && i.size === item.size,
@@ -150,9 +165,17 @@ export default function App() {
 
   // removeItem removes a specific item from the cart based on its product ID and size.
   const removeItem = (productId: string, size: string) => {
+    const removedItem = cartItems.find(
+      (item) => item.product.id === productId && item.size === size,
+    );
+
     setCartItems((prev) =>
       prev.filter((i) => !(i.product.id === productId && i.size === size)),
     );
+
+    if (removedItem) {
+      showToast(`${removedItem.product.name} removed from your bag`);
+    }
   };
 
   function CheckoutRoute({
