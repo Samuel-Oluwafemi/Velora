@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Check,
@@ -48,6 +49,7 @@ function statusIcon(status: string) {
 
 export default function AccountDashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [name, setName] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -115,7 +117,13 @@ export default function AccountDashboard() {
             <p className="mt-3 text-sm text-muted-foreground">{user?.email}</p>
           </div>
           <button
-            onClick={() => void logout()}
+            onClick={async () => {
+              await logout();
+              navigate("/account", {
+                replace: true,
+                state: { toast: "Signed out successfully" },
+              });
+            }}
             className="inline-flex items-center gap-2 self-start text-xs uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground md:self-auto"
           >
             <LogOut size={14} /> Sign out
