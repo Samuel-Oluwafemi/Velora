@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader, ShieldCheck } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function AdminLogin({ message }: { message?: string }) {
   const { login, loginLoading } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +17,10 @@ export function AdminLogin({ message }: { message?: string }) {
 
     try {
       await login(email, password);
+      navigate("/admin", {
+        replace: true,
+        state: { toast: "Admin signed in successfully" },
+      });
     } catch (loginError) {
       setError(
         loginError instanceof Error ? loginError.message : "Unable to sign in",
