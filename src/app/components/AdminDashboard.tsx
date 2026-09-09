@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowUpRight,
   BarChart2,
@@ -111,6 +112,7 @@ function EmptyState({ children }: { children: string }) {
 
 export function AdminDashboard() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -314,7 +316,13 @@ export function AdminDashboard() {
       </nav>
       <div className="px-4 py-5 border-t border-border space-y-0.5">
         <button
-          onClick={() => void logout()}
+          onClick={async () => {
+            await logout();
+            navigate("/admin", {
+              replace: true,
+              state: { toast: "Admin signed out successfully" },
+            });
+          }}
           className="w-full flex items-center gap-3 px-3 py-2.5 text-muted-foreground"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.82rem" }}
         >
