@@ -79,7 +79,10 @@
         "npm:typescript@^6.0.3",
         "npm:vaul@1.1.2",
         "npm:vite@^6.4.3"
-      ]
+      ],
+      "overrides": {
+        "jose": "4.15.9"
+      }
     }
   }
 }

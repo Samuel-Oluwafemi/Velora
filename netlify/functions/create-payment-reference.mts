@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { adminDb, adminAuth } from "../functions/firebase-admin.mjs";
 
 export default async (req: Request) => {
@@ -125,13 +126,13 @@ export default async (req: Request) => {
     const verifiedTotal = verifiedSubtotal + verifiedShipping;
 
     // Generate payment reference
-    const reference = `VELORA-${Date.now()}`;
+    const reference = `VELORA-${randomUUID()}`;
 
-    // Save payment reference
+    // Create only if the reference is unused; never overwrite another checkout.
     await adminDb
       .collection("paymentReferences")
       .doc(reference)
-      .set({
+      .create({
         userId: authenticatedUserId,
         amount: verifiedTotal * 100,
         currency: "NGN",
