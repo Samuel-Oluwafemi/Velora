@@ -2,6 +2,15 @@ import { randomUUID } from "node:crypto";
 import { getStorage } from "firebase-admin/storage";
 import { adminAuth, adminDb } from "./firebase-admin.mjs";
 
+const productCategories = new Set([
+  "Outerwear",
+  "Tops",
+  "Trousers",
+  "Shorts",
+  "Accessories",
+]);
+const productTags = new Set(["New", "Bestseller"]);
+
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -57,6 +66,7 @@ function validateProduct(value: unknown) {
     name.length > 160 ||
     !category ||
     category.length > 80 ||
+    !productCategories.has(category) ||
     typeof price !== "number" ||
     !Number.isFinite(price) ||
     price <= 0 ||
@@ -97,6 +107,7 @@ function validateProduct(value: unknown) {
   ) {
     return null;
   }
+  if (tag && !productTags.has(tag)) return null;
 
   return {
     name,

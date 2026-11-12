@@ -23,6 +23,7 @@ import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminRoute } from "./components/AdminRoute";
 import { AccountPage } from "./components/AccountPage";
 import { AboutPage } from "./components/AboutPage";
+import { HomepageIntro } from "./components/HomepageIntro";
 
 export default function App() {
   const navigate = useNavigate();
@@ -265,6 +266,7 @@ export default function App() {
       className="bg-background text-foreground"
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
+      <HomepageIntro />
       {toastMessage && <Toast message={toastMessage} />}
       <Routes>
         <Route

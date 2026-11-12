@@ -149,3 +149,11 @@ export const CATEGORIES = [
   "Shorts",
   "Accessories",
 ];
+
+export const PRODUCT_CATEGORIES = CATEGORIES.filter(
+  (category) => category !== "All",
+);
+
+export const PRODUCT_TAGS = [...new Set(PRODUCTS.flatMap((product) =>
+  product.tag ? [product.tag] : [],
+))];

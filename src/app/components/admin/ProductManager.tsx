@@ -5,7 +5,11 @@ import {
   saveProduct,
   uploadProductImage,
 } from "../../../services/productService";
-import type { Product } from "../store";
+import {
+  PRODUCT_CATEGORIES,
+  PRODUCT_TAGS,
+  type Product,
+} from "../store";
 
 interface ProductManagerProps {
   products: Product[];
@@ -208,14 +212,21 @@ function ProductEditor({
           </label>
           <label className="text-xs uppercase tracking-wider text-muted-foreground">
             Category
-            <input
+            <select
               required
-              maxLength={80}
               className={inputClass}
               value={category}
               onChange={(event) => setCategory(event.target.value)}
-              placeholder="e.g. Tops"
-            />
+            >
+              <option value="" disabled>
+                Select a category
+              </option>
+              {PRODUCT_CATEGORIES.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="text-xs uppercase tracking-wider text-muted-foreground">
             Sizes
@@ -229,13 +240,18 @@ function ProductEditor({
           </label>
           <label className="text-xs uppercase tracking-wider text-muted-foreground">
             Tag (optional)
-            <input
-              maxLength={80}
+            <select
               className={inputClass}
               value={tag}
               onChange={(event) => setTag(event.target.value)}
-              placeholder="New, Bestseller"
-            />
+            >
+              <option value="">No tag</option>
+              {PRODUCT_TAGS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="text-xs uppercase tracking-wider text-muted-foreground md:col-span-2">
             Description

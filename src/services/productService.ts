@@ -1,6 +1,5 @@
 import { getIdToken } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
-import { auth, db } from "../app/firebase";
+import { auth } from "../app/firebase";
 import { PRODUCTS, type Product } from "../app/components/store";
 
 type EditableProduct = Omit<Product, "id"> & { id?: string };
@@ -10,6 +9,7 @@ interface ProductFunctionResponse {
   message?: string;
   product?: Product;
   imageUrl?: string;
+  products?: unknown[];
 }
 
 async function adminHeaders() {
@@ -64,47 +64,70 @@ export async function uploadProductImage(
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const snapshot = await getDocs(collection(db, "products"));
+  const response = await fetch("/.netlify/functions/get-products");
+  const data = (await response.json()) as ProductFunctionResponse;
 
-  return snapshot.docs.map((productDocument) => {
-    const data = productDocument.data();
-    const images = Array.isArray(data.images)
-      ? data.images.filter(
+  if (!response.ok || !data.success || !Array.isArray(data.products)) {
+    throw new Error(data.message || "Unable to load products.");
+  }
+
+  return data.products.flatMap((entry): Product[] => {
+    if (typeof entry !== "object" || entry === null || !("id" in entry)) {
+      return [];
+    }
+
+    const productData = entry as Record<string, unknown>;
+    if (typeof productData.id !== "string") return [];
+    const catalogueImages = Array.isArray(productData.images)
+      ? productData.images.filter(
           (image): image is string => typeof image === "string",
         )
-      : typeof data.image === "string"
-        ? [data.image]
-        : PRODUCTS.find((product) => product.id === productDocument.id)
-            ?.images ?? [];
+      : [];
+    const images =
+      catalogueImages.length > 0
+        ? catalogueImages
+        : PRODUCTS.find((product) => product.id === productData.id)?.images ??
+          [];
+    const stockStatus =
+      productData.stockStatus === "lowStock" ||
+      productData.stockStatus === "outOfStock" ||
+      productData.stockStatus === "inStock"
+        ? productData.stockStatus
+        : productData.inStock === false
+          ? "outOfStock"
+          : "inStock";
 
-    return {
-      id: productDocument.id,
-      name: typeof data.name === "string" ? data.name : "Unnamed product",
-      price: typeof data.price === "number" ? data.price : 0,
-      category:
-        typeof data.category === "string" ? data.category : "Uncategorized",
-      description: typeof data.description === "string" ? data.description : "",
-      material: typeof data.material === "string" ? data.material : "",
-      sizes: Array.isArray(data.sizes)
-        ? data.sizes.filter((size): size is string => typeof size === "string")
-        : [],
-      images,
-      inStock:
-        data.stockStatus === "outOfStock" || data.inStock === false
-          ? false
-          : true,
-      stockStatus:
-        data.stockStatus === "lowStock" ||
-        data.stockStatus === "outOfStock" ||
-        data.stockStatus === "inStock"
-          ? data.stockStatus
-          : data.inStock === false
-            ? "outOfStock"
-            : "inStock",
-      ...(typeof data.stockQuantity === "number"
-        ? { stockQuantity: data.stockQuantity }
-        : {}),
-      ...(typeof data.tag === "string" ? { tag: data.tag } : {}),
-    };
+    return [
+      {
+        id: productData.id,
+        name:
+          typeof productData.name === "string"
+            ? productData.name
+            : "Unnamed product",
+        price: typeof productData.price === "number" ? productData.price : 0,
+        category:
+          typeof productData.category === "string"
+            ? productData.category
+            : "Uncategorized",
+        description:
+          typeof productData.description === "string"
+            ? productData.description
+            : "",
+        material:
+          typeof productData.material === "string" ? productData.material : "",
+        sizes: Array.isArray(productData.sizes)
+          ? productData.sizes.filter(
+              (size): size is string => typeof size === "string",
+            )
+          : [],
+        images,
+        inStock: stockStatus !== "outOfStock",
+        stockStatus,
+        ...(typeof productData.stockQuantity === "number"
+          ? { stockQuantity: productData.stockQuantity }
+          : {}),
+        ...(typeof productData.tag === "string" ? { tag: productData.tag } : {}),
+      },
+    ];
   });
 }

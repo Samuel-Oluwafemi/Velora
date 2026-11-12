@@ -20,159 +20,121 @@ export function HomePage({ onNavigate }: HomePageProps) {
   return (
     <div className="bg-background min-h-screen">
       {/* HERO */}
-      <section className="relative min-h-[680px] overflow-hidden md:h-[calc(100svh-5rem)] md:min-h-[720px]">
+      <section className="relative min-h-[680px] overflow-hidden bg-[#171714] md:h-[calc(100svh-5rem)] md:min-h-[720px]">
         <img
           src={heroImage}
-          style={{ minHeight: "680px" }}
-          alt="VELORA hero"
-          className="absolute inset-0 h-full w-full object-cover object-top"
+          alt="VELORA's considered collection"
+          className="absolute inset-0 h-full w-full object-cover object-[center_38%]"
         />
-        {/* Overlay */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(26,26,26,0.08) 0%, rgba(26,26,26,0.35) 100%)",
+              "linear-gradient(90deg, rgba(18,18,16,0.64) 0%, rgba(18,18,16,0.34) 48%, rgba(18,18,16,0.06) 100%), linear-gradient(0deg, rgba(18,18,16,0.46) 0%, transparent 58%)",
           }}
         />
 
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-14 md:px-16 md:pb-16">
-          <div className="max-w-screen-xl mx-auto">
+        <div className="absolute inset-0 flex items-end px-6 pb-16 md:items-center md:px-16 md:pb-0">
+          <div className="mx-auto w-full max-w-screen-xl">
             <Reveal>
-              <p
-              className="text-primary-foreground/70 uppercase tracking-[0.2em] mb-4"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem" }}
-            >
-              Premium Fashion
-              </p>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1
-              className="text-primary-foreground leading-none mb-5"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "clamp(2.8rem, 6vw, 5.5rem)",
-                fontWeight: 300,
-                maxWidth: "16ch",
-                lineHeight: 1.05,
-              }}
-            >
-              Timeless essentials
-              <br />
-              for Modern Living.
-              </h1>
-            </Reveal>
-            <Reveal delay={0.16}>
-              <p
-              className="text-primary-foreground/75 mb-10"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.9rem",
-                fontWeight: 300,
-                letterSpacing: "0.04em",
-              }}
-            >
-              Designed with intention. Made to last.
-              </p>
-            </Reveal>
-            <Reveal delay={0.24}>
-              <button
-              onClick={() => onNavigate("shop")}
-              className="px-8 py-3.5 bg-primary-foreground text-foreground hover:bg-accent transition-colors duration-300 cursor-pointer"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.75rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-              }}
-            >
-              Explore Collection
-              </button>
+              <div className="max-w-2xl">
+                <p className="mb-6 flex items-center gap-3 text-[0.62rem] uppercase tracking-[0.28em] text-[#dfcfb1]">
+                  <span className="h-px w-9 bg-[#c8b38e]" />
+                  A wardrobe, considered
+                </p>
+                <h1
+                  className="mb-6 max-w-[12ch] text-primary-foreground"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: "clamp(3.4rem, 8vw, 7.2rem)",
+                    fontWeight: 300,
+                    lineHeight: 0.88,
+                    letterSpacing: "-0.035em",
+                  }}
+                >
+                  The art of
+                  <br />
+                  understated
+                  <br />
+                  dressing.
+                </h1>
+                <p className="mb-9 max-w-md text-sm font-light leading-7 tracking-[0.04em] text-primary-foreground/80 md:text-base">
+                  Thoughtful pieces for a life well lived. Discover a quieter
+                  expression of personal style.
+                </p>
+                <div className="flex flex-wrap items-center gap-6">
+                  <button
+                    onClick={() => onNavigate("shop")}
+                    className="border border-[#dfcfb1] bg-[#dfcfb1] px-7 py-3.5 text-[0.65rem] uppercase tracking-[0.18em] text-[#171714] transition-colors duration-300 hover:bg-transparent hover:text-primary-foreground"
+                  >
+                    Discover the collection
+                  </button>
+                  <button
+                    onClick={() => onNavigate("about")}
+                    className="border-b border-white/45 pb-1 text-[0.65rem] uppercase tracking-[0.18em] text-primary-foreground/85 transition-colors hover:border-[#dfcfb1] hover:text-[#dfcfb1]"
+                  >
+                    Our point of view
+                  </button>
+                </div>
+              </div>
             </Reveal>
           </div>
+        </div>
+        <div className="absolute bottom-7 right-8 hidden items-center gap-3 text-[0.55rem] uppercase tracking-[0.22em] text-primary-foreground/65 md:flex">
+          <span className="h-px w-8 bg-primary-foreground/50" />
+          VELORA · Est. 2026
         </div>
       </section>
 
       {/* EDITORIAL STATEMENT */}
-      <section className="max-w-screen-xl mx-auto px-6 py-20 md:px-12 md:py-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <section className="mx-auto max-w-screen-xl px-6 py-24 md:px-12 md:py-36">
+        <div className="grid grid-cols-1 items-center gap-14 md:grid-cols-2 md:gap-24">
           <Reveal>
-            <div>
-            <p
-              className="text-muted-foreground uppercase tracking-[0.18em] mb-5"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem" }}
-            >
-              Our Philosophy
-            </p>
-            <h2
-              className="text-foreground leading-tight mb-6"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "clamp(2rem, 3.5vw, 3rem)",
-                fontWeight: 300,
-                lineHeight: 1.2,
-              }}
-            >
-              Clothes that last
-              <br />a decade, not a season.
-            </h2>
-            <p
-              className="text-muted-foreground leading-relaxed mb-8"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.88rem",
-                fontWeight: 300,
-                maxWidth: "44ch",
-              }}
-            >
-              Every VELORA piece is made to outlast trends. We work with artisan
-              mills in USA, Italy, and Portugal — sourcing only the materials
-              that improve with age. No fast-fashion shortcuts. No compromises.
-            </p>
-            <button
-              onClick={() => onNavigate("about")}
-              className="text-foreground border-b border-foreground/30 pb-0.5 hover:border-accent 
-              hover:text-accent transition-colors duration-200 cursor-pointer"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.78rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Our Story
-            </button>
+            <div className="max-w-lg">
+              <p className="mb-5 text-[0.62rem] uppercase tracking-[0.24em] text-muted-foreground">
+                The VELORA perspective
+              </p>
+              <h2
+                className="mb-7 text-foreground"
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: "clamp(2.4rem, 4.2vw, 4rem)",
+                  fontWeight: 300,
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Less, but chosen
+                <br />
+                with feeling.
+              </h2>
+              <p className="mb-8 max-w-[48ch] text-sm font-light leading-7 text-muted-foreground">
+                VELORA is a study in considered dressing: refined shapes,
+                thoughtful details, and pieces that feel as natural at the
+                beginning of the day as they do at its close. We believe style
+                is not about having more. It is about knowing what belongs.
+              </p>
+              <button
+                onClick={() => onNavigate("about")}
+                className="border-b border-foreground/35 pb-1 text-[0.65rem] uppercase tracking-[0.17em] text-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                Discover our story
+              </button>
             </div>
           </Reveal>
           <Reveal delay={0.12}>
-            <div className="relative">
-            <div
-              className="overflow-hidden"
-              style={{ minHeight: "400px", maxHeight: "500px" }}
-            >
-              <img
-                src={Image}
-                alt="Two women in minimal white — editorial"
-                className="w-full h-full object-cover object-center"
-              />
-            </div>
-            <div
-              className="absolute -bottom-5 -left-5 w-28 h-28 hidden md:flex items-center justify-center"
-              style={{ backgroundColor: "#C8B38E" }}
-            >
-              <span
-                className="text-foreground text-center leading-tight"
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: "0.85rem",
-                  fontWeight: 300,
-                }}
-              >
-                Est.
-                <br />
-                2026
-              </span>
-            </div>
+            <div className="relative md:ml-5">
+              <div className="absolute -right-3 -top-3 h-full w-full border border-[#c8b38e]/50 md:-right-5 md:-top-5" />
+              <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+                <img
+                  src={Image}
+                  alt="A quiet, considered VELORA editorial moment"
+                  className="h-full w-full object-cover object-center"
+                />
+              </div>
+              <p className="absolute -bottom-8 left-0 text-[0.56rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Personal style, thoughtfully considered
+              </p>
             </div>
           </Reveal>
         </div>
