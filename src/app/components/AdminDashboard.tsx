@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu as MenuIcon,
   Package,
+  RefreshCw,
   ShoppingCart,
   TrendingUp,
   Users,
@@ -25,14 +26,18 @@ import {
   YAxis,
 } from "recharts";
 import { useAuth } from "../../contexts/AuthContext";
+import { useProducts } from "../../contexts/ProductContext";
 import {
   getAdminDashboardData,
   type AdminCustomer,
 } from "../../services/adminDashboardService";
 import type { Order } from "../../services/orderService";
-import { getProducts } from "../../services/productService";
-import type { Product } from "./store";
+import {
+  setOrderStatus as persistOrderStatus,
+  syncPaymentStatus,
+} from "../../services/adminOrderService";
 import { OrderFilters, type OrderSort } from "./admin/OrderFilters";
+import { ProductManager } from "./admin/ProductManager";
 import { CountUp, Reveal } from "./Motion";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -41,6 +46,11 @@ const STATUS_COLORS: Record<string, string> = {
   shipped: "#7C8F72",
   delivered: "#1A1A1A",
   cancelled: "#C0392B",
+  paid: "#15803D",
+  success: "#15803D",
+  failed: "#C0392B",
+  abandoned: "#C0392B",
+  reversed: "#6B7280",
 };
 
 type Section = "dashboard" | "products" | "orders" | "customers" | "analytics";
@@ -112,13 +122,21 @@ function EmptyState({ children }: { children: string }) {
 
 export function AdminDashboard() {
   const { logout } = useAuth();
+  const {
+    products,
+    error: productsError,
+    loading: productsLoading,
+    upsertProduct,
+    refreshProducts,
+  } = useProducts();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderActionError, setOrderActionError] = useState("");
+  const [orderActionLoading, setOrderActionLoading] = useState(false);
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
@@ -128,16 +146,82 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const replaceOrder = (orderId: string, updates: Partial<Order>) => {
+    setOrders((currentOrders) =>
+      currentOrders.map((order) =>
+        order.id === orderId ? { ...order, ...updates } : order,
+      ),
+    );
+    setSelectedOrder((currentOrder) =>
+      currentOrder?.id === orderId
+        ? { ...currentOrder, ...updates }
+        : currentOrder,
+    );
+  };
+
+  const handleOrderStatusChange = async (status: string) => {
+    if (!selectedOrder) return;
+    setOrderActionError("");
+    setOrderActionLoading(true);
+    try {
+      await persistOrderStatus(selectedOrder.id, status);
+      replaceOrder(selectedOrder.id, { status });
+    } catch (actionError) {
+      setOrderActionError(
+        actionError instanceof Error
+          ? actionError.message
+          : "Unable to update order status.",
+      );
+    } finally {
+      setOrderActionLoading(false);
+    }
+  };
+
+  const handlePaymentSync = async () => {
+    if (!selectedOrder) return;
+    setOrderActionError("");
+    setOrderActionLoading(true);
+    try {
+      const result = await syncPaymentStatus(selectedOrder.id);
+      if (!result.paymentStatus) {
+        throw new Error("Paystack did not return a payment status.");
+      }
+      replaceOrder(selectedOrder.id, {
+        paymentStatus: result.paymentStatus,
+        payment: {
+          ...selectedOrder.payment,
+          status:
+            result.paymentStatus === "paid"
+              ? "success"
+              : result.paymentStatus,
+        },
+      });
+      void refreshProducts().catch((refreshError: unknown) =>
+        console.error(
+          "Payment status updated but inventory refresh failed:",
+          refreshError,
+        ),
+      );
+    } catch (actionError) {
+      setOrderActionError(
+        actionError instanceof Error
+          ? actionError.message
+          : "Unable to verify payment.",
+      );
+    } finally {
+      setOrderActionLoading(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(false);
 
-    Promise.all([getAdminDashboardData(), getProducts()])
-      .then(([dashboardData, loadedProducts]) => {
+    getAdminDashboardData()
+      .then((dashboardData) => {
         if (!active) return;
         setOrders(dashboardData.orders);
-        setProducts(loadedProducts);
         setCustomers(
           dashboardData.customers.filter(
             (customer) => customer.role !== "admin",
@@ -176,9 +260,11 @@ export function AdminDashboard() {
     return orders
       .filter((order) => {
         const status = String(order.status || "pending").toLowerCase();
-        const paymentStatus = String(
+        const rawPaymentStatus = String(
           order.paymentStatus || order.payment?.status || "unknown",
         ).toLowerCase();
+        const paymentStatus =
+          rawPaymentStatus === "success" ? "paid" : rawPaymentStatus;
         const searchableText = [
           order.id,
           order.email,
@@ -363,10 +449,14 @@ export function AdminDashboard() {
             key={order.id}
             tabIndex={0}
             role="button"
-            onClick={() => setSelectedOrder(order)}
+            onClick={() => {
+              setOrderActionError("");
+              setSelectedOrder(order);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
+                setOrderActionError("");
                 setSelectedOrder(order);
               }
             }}
@@ -414,6 +504,29 @@ export function AdminDashboard() {
                 {status}
               </span>
             </td>
+            <td className="px-6 py-3.5">
+              {(() => {
+                const rawPaymentStatus = String(
+                  order.paymentStatus || order.payment?.status || "pending",
+                ).toLowerCase();
+                const paymentStatus =
+                  rawPaymentStatus === "success" ? "paid" : rawPaymentStatus;
+                const color = STATUS_COLORS[paymentStatus] || "#6B7280";
+                return (
+                  <span
+                    className="px-2.5 py-0.5"
+                    style={{
+                      ...labelStyle,
+                      fontSize: "0.65rem",
+                      color,
+                      border: `1px solid ${color}`,
+                    }}
+                  >
+                    {paymentStatus}
+                  </span>
+                );
+              })()}
+            </td>
             <td
               className="px-6 py-3.5 text-foreground"
               style={{ fontSize: "0.8rem" }}
@@ -425,7 +538,7 @@ export function AdminDashboard() {
       })
     ) : (
       <tr>
-        <td colSpan={6}>
+        <td colSpan={7}>
           <EmptyState>No orders yet.</EmptyState>
         </td>
       </tr>
@@ -589,7 +702,8 @@ export function AdminDashboard() {
                             "Customer",
                             "Product",
                             "Date",
-                            "Status",
+                            "Order status",
+                            "Payment",
                             "Total",
                           ].map((header) => (
                             <th
@@ -611,100 +725,26 @@ export function AdminDashboard() {
           )}
 
           {activeSection === "products" && (
-            <div>
-              <p
-                className="text-muted-foreground mb-6"
-                style={{ fontSize: "0.82rem" }}
-              >
-                {products.length} products
-              </p>
-              <div
-                className="bg-secondary overflow-hidden"
-                style={{ border: "1px solid #E5E7EB" }}
-              >
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px]">
-                    <thead>
-                      <tr>
-                        {["Product", "Category", "Price", "Sizes", "Tag"].map(
-                          (header) => (
-                            <th
-                              key={header}
-                              className="text-left px-6 py-3 text-muted-foreground"
-                              style={labelStyle}
-                            >
-                              {header}
-                            </th>
-                          ),
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.length ? (
-                        products.map((product, index) => (
-                          <tr
-                            key={product.id}
-                            style={{
-                              borderBottom:
-                                index < products.length - 1
-                                  ? "1px solid #E5E7EB"
-                                  : "none",
-                            }}
-                          >
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                {product.images[0] ? (
-                                  <img
-                                    src={product.images[0]}
-                                    alt={product.name}
-                                    className="w-10 h-12 object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-12 bg-muted" />
-                                )}
-                                <span style={{ fontSize: "0.82rem" }}>
-                                  {product.name}
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              className="px-6 py-4 text-muted-foreground"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {product.category}
-                            </td>
-                            <td
-                              className="px-6 py-4"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {formatNaira(product.price)}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-muted-foreground"
-                              style={{ fontSize: "0.78rem" }}
-                            >
-                              {product.sizes.join(", ") || "—"}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-muted-foreground"
-                              style={{ fontSize: "0.8rem" }}
-                            >
-                              {product.tag || "—"}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={5}>
-                            <EmptyState>No products found.</EmptyState>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+            productsError ? (
+              <div className="space-y-3">
+                <p className="text-sm text-red-700">{productsError}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void refreshProducts().catch((loadError: unknown) =>
+                      console.error("Failed to refresh products:", loadError),
+                    );
+                  }}
+                  className="border border-border px-4 py-2 text-xs uppercase tracking-wider"
+                >
+                  Retry
+                </button>
               </div>
-            </div>
+            ) : productsLoading ? (
+              <p className="text-sm text-muted-foreground">Loading products…</p>
+            ) : (
+              <ProductManager products={products} onSaved={upsertProduct} />
+            )
           )}
 
           {activeSection === "orders" && (
@@ -837,6 +877,71 @@ export function AdminDashboard() {
                     </div>
                   </div>
 
+                  {selectedOrder.inventoryStatus === "attention" && (
+                    <p
+                      className="mb-5 border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+                      role="alert"
+                    >
+                      Stock changed after payment started. This order was
+                      recorded as paid; review stock and fulfilment before
+                      dispatch.
+                    </p>
+                  )}
+
+                  <div className="grid gap-4 border-t border-border py-5 sm:grid-cols-2">
+                    <label className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Order / fulfilment status
+                      <select
+                        value={selectedOrder.status || "pending"}
+                        disabled={orderActionLoading}
+                        onChange={(event) =>
+                          void handleOrderStatusChange(event.target.value)
+                        }
+                        className="mt-2 w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground disabled:opacity-60"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </label>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                        Payment confirmation
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => void handlePaymentSync()}
+                        disabled={
+                          orderActionLoading ||
+                          !selectedOrder.payment?.reference
+                        }
+                        className="mt-2 inline-flex items-center gap-2 border border-border bg-background px-3 py-2.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <RefreshCw
+                          size={14}
+                          className={orderActionLoading ? "animate-spin" : ""}
+                        />
+                        {orderActionLoading
+                          ? "Checking…"
+                          : "Verify with Paystack"}
+                      </button>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Paid status is updated only after Paystack confirms the
+                        reference and amount.
+                      </p>
+                    </div>
+                  </div>
+                  {orderActionError && (
+                    <p
+                      className="mb-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                      role="alert"
+                    >
+                      {orderActionError}
+                    </p>
+                  )}
+
                   <div className="border-t border-border pt-4">
                     <p
                       className="text-muted-foreground mb-3"
@@ -916,7 +1021,8 @@ export function AdminDashboard() {
                           "Customer",
                           "Product",
                           "Date",
-                          "Status",
+                          "Order status",
+                          "Payment",
                           "Total",
                         ].map((header) => (
                           <th

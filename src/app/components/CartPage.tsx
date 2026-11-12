@@ -23,7 +23,7 @@ export function CartPage({
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
-  const shipping = subtotal > 200000 ? 0 : 12000;
+  const shipping = subtotal >= 50000 ? 0 : 3000;
   const total = subtotal + shipping;
 
   if (cartItems.length === 0) {

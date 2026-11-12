@@ -33,6 +33,22 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           className="w-full h-full object-cover transition-transform duration-700"
           style={{ transform: hovered ? "scale(1.04)" : "scale(1)" }}
         />
+        {product.stockStatus !== "inStock" &&
+          (product.stockStatus !== undefined ||
+            product.inStock === false) && (
+          <span
+            className={`absolute inset-x-0 top-0 px-3 py-2 text-center text-[0.65rem] uppercase tracking-[0.12em] ${
+              product.stockStatus === "outOfStock" || product.inStock === false
+                ? "bg-red-100 text-red-800"
+                : "bg-amber-100 text-amber-900"
+            }`}
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            {product.stockStatus === "outOfStock" || product.inStock === false
+              ? "Out of stock"
+              : `Low stock · ${product.stockQuantity ?? 0} left`}
+          </span>
+        )}
         <span className="absolute inset-x-0 bottom-0 translate-y-full bg-foreground px-4 py-3 text-center text-[0.65rem] uppercase tracking-[0.16em] text-primary-foreground transition-transform duration-300 group-hover:translate-y-0">View piece</span>
         {/* Tag */}
         {product.tag && (

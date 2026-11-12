@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { PRODUCTS, Product, CartItem } from "./store";
+import type { Product, CartItem } from "./store";
+import { useProducts } from "../../contexts/ProductContext";
 import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -17,31 +18,76 @@ export function ProductDetailPage({
   onNavigate,
   onAddToCart,
 }: ProductDetailPageProps) {
-  const product = PRODUCTS.find((p) => p.id === productId) || PRODUCTS[0];
+  const { products, loading, error } = useProducts();
   const [selectedSize, setSelectedSize] = useState("");
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+  const [stockError, setStockError] = useState("");
 
-  const related = PRODUCTS.filter(
-    (p) => p.id !== product.id && p.category === product.category,
-  ).slice(0, 3);
-  const fallbackRelated = PRODUCTS.filter((p) => p.id !== product.id).slice(
-    0,
-    3,
-  );
+  const product = products.find((item) => item.id === productId);
+  const related =
+    product &&
+    products
+      .filter((item) => item.id !== product.id && item.category === product.category)
+      .slice(0, 3);
+  const fallbackRelated =
+    product &&
+    products.filter((item) => item.id !== product.id).slice(0, 3);
 
   const handleAdd = () => {
+    if (
+      !product ||
+      product.stockStatus === "outOfStock" ||
+      product.inStock === false
+    ) {
+      return;
+    }
+    if (
+      product.stockStatus === "lowStock" &&
+      quantity > (product.stockQuantity ?? 0)
+    ) {
+      setStockError(
+        `Only ${product.stockQuantity ?? 0} ${product.stockQuantity === 1 ? "item is" : "items are"} available.`,
+      );
+      return;
+    }
     if (!selectedSize) {
       setSizeError(true);
       return;
     }
     setSizeError(false);
+    setStockError("");
     onAddToCart({ product, size: selectedSize, quantity });
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">
+        Loading product…
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          {error ? "Unable to load this product." : "This product is no longer available."}
+        </p>
+        <button
+          type="button"
+          onClick={() => onNavigate("shop")}
+          className="border border-border px-5 py-3 text-xs uppercase tracking-wider"
+        >
+          Return to shop
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -144,6 +190,20 @@ export function ProductDetailPage({
             >
               ₦{product.price.toLocaleString("en-NG")}
             </p>
+            {product.stockStatus === "outOfStock" ||
+            product.inStock === false ? (
+              <p className="mb-6 text-sm font-medium text-red-700">
+                Currently out of stock
+              </p>
+            ) : product.stockStatus === "lowStock" ? (
+              <p className="mb-6 text-sm font-medium text-amber-700">
+                Low stock · {product.stockQuantity ?? 0} remaining
+              </p>
+            ) : (
+              <p className="mb-6 text-sm font-medium text-emerald-700">
+                In stock
+              </p>
+            )}
 
             {/* Description */}
             <p
@@ -250,17 +310,40 @@ export function ProductDetailPage({
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => {
+                      setStockError("");
+                      setQuantity(
+                        product.stockStatus === "lowStock"
+                          ? Math.min(
+                              product.stockQuantity ?? 1,
+                              quantity + 1,
+                            )
+                          : quantity + 1,
+                      );
+                    }}
+                    disabled={
+                      product.stockStatus === "lowStock" &&
+                      quantity >= (product.stockQuantity ?? 0)
+                    }
                     className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <Plus size={13} strokeWidth={1.5} />
                   </button>
                 </div>
               </div>
+              {stockError && (
+                <p className="mb-4 text-sm text-red-700" role="alert">
+                  {stockError}
+                </p>
+              )}
 
               {/* Add to Cart */}
               <button
-                disabled={added}
+                disabled={
+                  added ||
+                  product.inStock === false ||
+                  product.stockStatus === "outOfStock"
+                }
                 onClick={handleAdd}
                 className="w-full py-4 transition-colors duration-300"
                 style={{
@@ -268,11 +351,22 @@ export function ProductDetailPage({
                   fontSize: "0.78rem",
                   letterSpacing: "0.15em",
                   textTransform: "uppercase",
-                  backgroundColor: added ? "#C8B38E" : "#1A1A1A",
+                  backgroundColor:
+                    added
+                      ? "#C8B38E"
+                      : product.inStock === false ||
+                          product.stockStatus === "outOfStock"
+                        ? "#9CA3AF"
+                        : "#1A1A1A",
                   color: "#F8F6F2",
                 }}
               >
-                {added ? "Added to Bag ✓" : "Add to Bag"}
+                {product.stockStatus === "outOfStock" ||
+                product.inStock === false
+                  ? "Out of Stock"
+                  : added
+                    ? "Added to Bag ✓"
+                    : "Add to Bag"}
               </button>
             </div>
 
@@ -302,7 +396,7 @@ export function ProductDetailPage({
         </div>
 
         {/* Related products */}
-        {(related.length > 0 || fallbackRelated.length > 0) && (
+        {((related?.length ?? 0) > 0 || (fallbackRelated?.length ?? 0) > 0) && (
           <Reveal className="border-t border-border pt-14 pb-20">
             <h2
               className="text-foreground mb-10"
@@ -315,7 +409,7 @@ export function ProductDetailPage({
               You May Also Like
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
-              {(related.length > 0 ? related : fallbackRelated).map((p) => (
+              {(related?.length ? related : fallbackRelated ?? []).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}

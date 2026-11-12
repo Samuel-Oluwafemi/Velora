@@ -45,6 +45,7 @@ export interface Order {
 
   status: string;
   paymentStatus: string;
+  inventoryStatus?: "ok" | "attention";
 
   createdAt: unknown;
 }

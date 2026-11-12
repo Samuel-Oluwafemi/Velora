@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { auth } from "../firebase";
 import { useAuth } from "../../contexts/AuthContext";
+import { useProducts } from "../../contexts/ProductContext";
 import { CartItem } from "./store";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -21,6 +22,7 @@ export function CheckoutPage({
   onOrderComplete,
 }: CheckoutPageProps) {
   const { user } = useAuth();
+  const { refreshProducts } = useProducts();
   const [step, setStep] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -99,6 +101,7 @@ export function CheckoutPage({
     setOrderError(null);
 
     try {
+      await refreshProducts();
       const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
       // Check if the Paystack public key is available
@@ -147,6 +150,12 @@ export function CheckoutPage({
       if (!paymentReferenceResponse.ok || !paymentReferenceData.success) {
         throw new Error(
           paymentReferenceData.message || "Could not create payment reference.",
+        );
+      }
+
+      if (paymentReferenceData.amount !== total * 100) {
+        throw new Error(
+          "Product prices changed. Your cart has been updated; please review it and try again.",
         );
       }
 
@@ -229,6 +238,12 @@ export function CheckoutPage({
             const orderId = verifyData.orderId;
 
             setOrderId(orderId);
+            void refreshProducts().catch((refreshError: unknown) =>
+              console.error(
+                "Payment succeeded but inventory refresh failed:",
+                refreshError,
+              ),
+            );
 
             onOrderComplete();
             setCompleted(true);
@@ -256,7 +271,11 @@ export function CheckoutPage({
     } catch (error) {
       console.error("Failed to initialize Paystack:", error);
 
-      setOrderError("We couldn't initialize payment. Please try again.");
+      setOrderError(
+        error instanceof Error
+          ? error.message
+          : "We couldn't initialize payment. Please try again.",
+      );
 
       setOrderLoading(false);
     }

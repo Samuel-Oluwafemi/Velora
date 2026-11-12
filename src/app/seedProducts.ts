@@ -14,7 +14,11 @@ export const seedProducts = async () => {
         description: product.description,
         material: product.material,
         sizes: product.sizes,
+        images: product.images,
         tag: product.tag ?? null,
+        stockStatus: "inStock",
+        stockQuantity: null,
+        inStock: true,
       });
     }
 

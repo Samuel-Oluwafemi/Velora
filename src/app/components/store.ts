@@ -24,6 +24,9 @@ export interface Product {
   sizes: string[];
   images: string[];
   tag?: string;
+  inStock?: boolean;
+  stockStatus?: "inStock" | "lowStock" | "outOfStock";
+  stockQuantity?: number;
 }
 
 export interface CartItem {

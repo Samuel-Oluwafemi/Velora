@@ -74,8 +74,9 @@ export function OrderFilters({
           <select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)} className="mt-1 w-full px-3 py-2 border border-border bg-background text-foreground">
             <option value="all">All payments</option>
             <option value="paid">Paid</option>
-            <option value="success">Successful</option>
             <option value="failed">Failed</option>
+            <option value="abandoned">Abandoned</option>
+            <option value="reversed">Reversed</option>
             <option value="pending">Pending</option>
           </select>
         </label>

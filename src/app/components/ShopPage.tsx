@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PRODUCTS, CATEGORIES } from "./store";
+import { useProducts } from "../../contexts/ProductContext";
 import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
 import { SlidersHorizontal, X } from "lucide-react";
@@ -10,11 +10,16 @@ interface ShopPageProps {
 }
 
 export function ShopPage({ onNavigate }: ShopPageProps) {
+  const { products, loading, error } = useProducts();
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const filtered = PRODUCTS.filter(
+  const categories = [
+    "All",
+    ...new Set(products.map((product) => product.category)),
+  ];
+  const filtered = products.filter(
     (p) => activeCategory === "All" || p.category === activeCategory,
   ).sort((a, b) => {
     if (sortBy === "price-asc") return a.price - b.price;
@@ -49,7 +54,7 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
         <div className="flex items-center justify-between py-5 border-b border-border gap-4 sticky top-[4.5rem] md:top-20 z-20 bg-background/95 backdrop-blur-sm">
           {/* Category pills — desktop */}
           <div className="hidden md:flex items-center gap-1 flex-wrap">
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -135,7 +140,7 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => {
@@ -179,6 +184,24 @@ export function ShopPage({ onNavigate }: ShopPageProps) {
               <ProductCard product={product} onClick={() => onNavigate("product", product.id)} />
             </Reveal>
           ))}
+          {loading && (
+            <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+              Loading products…
+            </p>
+          )}
+          {!loading && error && (
+            <p
+              className="col-span-full py-12 text-center text-sm text-red-700"
+              role="alert"
+            >
+              Unable to load products. Please try again later.
+            </p>
+          )}
+          {!loading && !error && filtered.length === 0 && (
+            <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+              No products in this category yet.
+            </p>
+          )}
         </div>
       </div>
 

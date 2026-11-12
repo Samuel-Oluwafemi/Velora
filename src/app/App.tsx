@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useProducts } from "../contexts/ProductContext";
 import { CartItem } from "./components/store";
 import { Navbar } from "./components/Navbar";
 import { Toast } from "./components/Toast";
@@ -28,6 +29,7 @@ export default function App() {
   const location = useLocation();
 
   const { user, loading: authLoading } = useAuth();
+  const { products } = useProducts();
 
   // 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -77,6 +79,19 @@ export default function App() {
       return [];
     }
   });
+
+  useEffect(() => {
+    if (!products.length) return;
+
+    setCartItems((currentItems) =>
+      currentItems.map((item) => {
+        const latestProduct = products.find(
+          (product) => product.id === item.product.id,
+        );
+        return latestProduct ? { ...item, product: latestProduct } : item;
+      }),
+    );
+  }, [products]);
 
   // Handle toast messages from navigation state
   useEffect(() => {
@@ -131,6 +146,32 @@ export default function App() {
 
   // Cart management functions for adding, updating, and removing items
   const addToCart = (item: CartItem) => {
+    const currentProduct = products.find(
+      (product) => product.id === item.product.id,
+    );
+    if (
+      currentProduct?.stockStatus === "outOfStock" ||
+      currentProduct?.inStock === false
+    ) {
+      showToast("This product is currently out of stock.");
+      return;
+    }
+
+    if (currentProduct?.stockStatus === "lowStock") {
+      const currentQuantity = cartItems
+        .filter((cartItem) => cartItem.product.id === item.product.id)
+        .reduce((sum, cartItem) => sum + cartItem.quantity, 0);
+      if (
+        currentQuantity + item.quantity >
+        (currentProduct.stockQuantity ?? 0)
+      ) {
+        showToast(
+          `Only ${currentProduct.stockQuantity ?? 0} of this product are available.`,
+        );
+        return;
+      }
+    }
+
     showToast(`${item.product.name} added to your bag`);
 
     setCartItems((prev) => {
@@ -342,4 +383,3 @@ function ProductDetailRoute({
     />
   );
 }
-

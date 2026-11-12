@@ -67,7 +67,18 @@ export default async (req: Request) => {
     const { items, email, customer, shippingAddress } = body;
 
     // Validate cart
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (
+      !Array.isArray(items) ||
+      items.length === 0 ||
+      items.length > 50 ||
+      !items.every(
+        (item: any) =>
+          typeof item?.product?.id === "string" &&
+          Number.isInteger(item.quantity) &&
+          item.quantity > 0 &&
+          typeof item.size === "string",
+      )
+    ) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -91,7 +102,7 @@ export default async (req: Request) => {
       productRefs.map((ref: any) => ref.get()),
     );
 
-    // Make sure every product exists
+    // Make sure every product exists and is available to purchase.
     for (const productDoc of productDocs) {
       if (!productDoc.exists) {
         return new Response(
@@ -104,6 +115,63 @@ export default async (req: Request) => {
             headers: {
               "Content-Type": "application/json",
             },
+          },
+        );
+      }
+
+      const productData = productDoc.data();
+      if (
+        productData?.stockStatus === "outOfStock" ||
+        productData?.inStock === false
+      ) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: `${productData.name || "A product"} is out of stock.`,
+          }),
+          {
+            status: 409,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      const requestedQuantity = items.reduce(
+        (sum: number, item: any, index: number) =>
+          sum +
+          (productDocs[index].id === productDoc.id ? item.quantity : 0),
+        0,
+      );
+      if (
+        productData?.stockStatus === "lowStock" &&
+        typeof productData.stockQuantity === "number" &&
+        requestedQuantity > productData.stockQuantity
+      ) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: `${productData.name || "A product"} has only ${productData.stockQuantity} available.`,
+          }),
+          {
+            status: 409,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      if (
+        typeof productData?.price !== "number" ||
+        !Number.isFinite(productData.price) ||
+        productData.price <= 0
+      ) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: "A product has an invalid price.",
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -144,7 +212,12 @@ export default async (req: Request) => {
           const productData = productDocs[index].data();
 
           return {
-            productId: productData.id,
+            productId: productData.id || productDocs[index].id,
+            name: productData.name,
+            price: productData.price,
+            image: Array.isArray(productData.images)
+              ? productData.images[0] ?? null
+              : null,
             quantity: item.quantity,
             size: item.size,
           };

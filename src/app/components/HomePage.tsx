@@ -1,4 +1,4 @@
-import { PRODUCTS } from "./store";
+import { useProducts } from "../../contexts/ProductContext";
 import { ProductCard } from "./ProductCard";
 import { Footer } from "./Footer";
 import heroImage from "../../assets/images/heroImg.png";
@@ -12,7 +12,10 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate }: HomePageProps) {
-  const featured = PRODUCTS.slice(0, 4);
+  const { products, loading, error } = useProducts();
+  const featured = products
+    .filter((product) => product.stockStatus !== "outOfStock" && product.inStock !== false)
+    .slice(0, 4);
 
   return (
     <div className="bg-background min-h-screen">
@@ -222,6 +225,11 @@ export function HomePage({ onNavigate }: HomePageProps) {
             />
           ))}
         </Reveal>
+        {!loading && error && (
+          <p className="mt-6 text-sm text-muted-foreground" role="status">
+            Products are temporarily unavailable.
+          </p>
+        )}
       </section>
 
       {/* EDITORIAL SPLIT — Two images */}

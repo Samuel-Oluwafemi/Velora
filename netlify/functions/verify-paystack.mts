@@ -83,13 +83,16 @@ export default async (req: Request) => {
     const authenticatedUserId = decodedToken.uid;
 
     // Check if the authenticated user ID matches the user ID in the request body
-    const { reference, email, customer, items, shippingAddress } = body;
-    // Check if payment reference is provided
-    if (!reference || !email || !customer || !items || !shippingAddress) {
+    const { reference } = body;
+    if (
+      typeof reference !== "string" ||
+      reference.length > 120 ||
+      !/^[A-Za-z0-9_-]+$/.test(reference)
+    ) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "Payment and order information are required.",
+          message: "A valid payment reference is required.",
         }),
         {
           status: 400,
@@ -273,9 +276,23 @@ export default async (req: Request) => {
       );
     }
 
-    // Fetch the trusted product documents from Firestore
-    const productRefs = items.map((item: any) =>
-      adminDb.collection("products").doc(item.product.id),
+    const paymentItems = paymentReference.items;
+    if (!Array.isArray(paymentItems) || paymentItems.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Payment items are missing.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // Product details are snapshotted when the payment reference is created.
+    const productRefs = paymentItems.map((item: any) =>
+      adminDb.collection("products").doc(item.productId),
     );
 
     const productDocs = await Promise.all(
@@ -301,13 +318,18 @@ export default async (req: Request) => {
     }
 
     // Build order items using trusted Firestore product data
-    const verifiedItems = items.map((item: any, index: number) => {
+    const verifiedItems = paymentItems.map((item: any, index: number) => {
       const productData = productDocs[index].data();
 
       return {
-        productId: productData.id,
-        name: productData.name,
-        price: productData.price,
+        productId: productData.id || productDocs[index].id,
+        name: item.name || productData.name,
+        price: typeof item.price === "number" ? item.price : productData.price,
+        image:
+          item.image ||
+          (Array.isArray(productData.images)
+            ? productData.images[0] ?? ""
+            : ""),
         quantity: item.quantity,
         size: item.size,
       };
@@ -341,11 +363,24 @@ export default async (req: Request) => {
     }
 
     const orderRef = adminDb.collection("orders").doc(reference);
+    const requestedByProduct = new Map<string, number>();
+    for (const item of paymentItems) {
+      requestedByProduct.set(
+        item.productId,
+        (requestedByProduct.get(item.productId) ?? 0) + item.quantity,
+      );
+    }
+    const stockRefs = [...requestedByProduct.keys()].map((productId) =>
+      adminDb.collection("products").doc(productId),
+    );
 
     // Use a transaction to atomically verify the payment
     // and create the order.
     await adminDb.runTransaction(async (transactionRef) => {
       const paymentDoc = await transactionRef.get(paymentReferenceRef);
+      const currentProductDocs = await Promise.all(
+        stockRefs.map((ref) => transactionRef.get(ref)),
+      );
 
       // Check if the payment reference still exists
       if (!paymentDoc.exists) {
@@ -368,6 +403,29 @@ export default async (req: Request) => {
         throw new Error("Invalid payment reference status.");
       }
 
+      let inventoryAttention = false;
+      for (let index = 0; index < currentProductDocs.length; index += 1) {
+        const currentProduct = currentProductDocs[index];
+        const currentData = currentProduct.data();
+        const requestedQuantity =
+          requestedByProduct.get(currentProduct.id) ?? 0;
+        if (
+          !currentData ||
+          currentData.stockStatus === "outOfStock" ||
+          currentData.inStock === false
+        ) {
+          inventoryAttention = true;
+          continue;
+        }
+        if (
+          currentData.stockStatus === "lowStock" &&
+          (typeof currentData.stockQuantity !== "number" ||
+            currentData.stockQuantity < requestedQuantity)
+        ) {
+          inventoryAttention = true;
+        }
+      }
+
       // Mark payment as verified and remember the order ID.
       transactionRef.update(paymentReferenceRef, {
         status: "verified",
@@ -376,17 +434,39 @@ export default async (req: Request) => {
         orderId: orderRef.id,
       });
 
+      for (let index = 0; index < currentProductDocs.length; index += 1) {
+        const currentProduct = currentProductDocs[index];
+        const currentData = currentProduct.data();
+        if (currentData?.stockStatus !== "lowStock") continue;
+
+        const remainingQuantity =
+          typeof currentData.stockQuantity === "number"
+            ? currentData.stockQuantity
+            : 0;
+        const available = Math.max(
+          0,
+          remainingQuantity -
+            (requestedByProduct.get(currentProduct.id) ?? 0),
+        );
+        transactionRef.update(currentProduct.ref, {
+          stockStatus: available === 0 ? "outOfStock" : "lowStock",
+          stockQuantity: available,
+          inStock: available > 0,
+          updatedAt: new Date(),
+        });
+      }
+
       // Create the order.
       transactionRef.set(orderRef, {
         userId: authenticatedUserId,
 
-        email,
+        email: paymentReference.email,
 
-        customer,
+        customer: paymentReference.customer,
 
         items: verifiedItems,
 
-        shippingAddress,
+        shippingAddress: paymentReference.shippingAddress,
 
         subtotal: verifiedSubtotal,
         shipping: verifiedShipping,
@@ -403,6 +483,7 @@ export default async (req: Request) => {
 
         status: "pending",
         paymentStatus: "paid",
+        inventoryStatus: inventoryAttention ? "attention" : "ok",
 
         createdAt: new Date(),
       });

@@ -341,9 +341,14 @@ export default async (req: Request) => {
       const productData = productDocs[index].data();
 
       return {
-        productId: productData.id,
-        name: productData.name,
-        price: productData.price,
+        productId: productData.id || productDocs[index].id,
+        name: item.name || productData.name,
+        price: typeof item.price === "number" ? item.price : productData.price,
+        image:
+          item.image ||
+          (Array.isArray(productData.images)
+            ? productData.images[0] ?? ""
+            : ""),
         quantity: item.quantity,
         size: item.size,
       };
@@ -378,9 +383,22 @@ export default async (req: Request) => {
     }
 
     const orderRef = adminDb.collection("orders").doc(reference);
+    const requestedByProduct = new Map<string, number>();
+    for (const item of paymentItems) {
+      requestedByProduct.set(
+        item.productId,
+        (requestedByProduct.get(item.productId) ?? 0) + item.quantity,
+      );
+    }
+    const stockRefs = [...requestedByProduct.keys()].map((productId) =>
+      adminDb.collection("products").doc(productId),
+    );
 
     await adminDb.runTransaction(async (transactionRef) => {
       const paymentDoc = await transactionRef.get(paymentReferenceRef);
+      const currentProductDocs = await Promise.all(
+        stockRefs.map((ref) => transactionRef.get(ref)),
+      );
 
       if (!paymentDoc.exists) {
         throw new Error("Payment reference not found.");
@@ -401,6 +419,28 @@ export default async (req: Request) => {
         throw new Error("Invalid payment reference status.");
       }
 
+      let inventoryAttention = false;
+      for (const currentProduct of currentProductDocs) {
+        const currentData = currentProduct.data();
+        const requestedQuantity =
+          requestedByProduct.get(currentProduct.id) ?? 0;
+        if (
+          !currentData ||
+          currentData.stockStatus === "outOfStock" ||
+          currentData.inStock === false
+        ) {
+          inventoryAttention = true;
+          continue;
+        }
+        if (
+          currentData.stockStatus === "lowStock" &&
+          (typeof currentData.stockQuantity !== "number" ||
+            currentData.stockQuantity < requestedQuantity)
+        ) {
+          inventoryAttention = true;
+        }
+      }
+
       // Mark payment reference as verified
       transactionRef.update(paymentReferenceRef, {
         status: "verified",
@@ -408,6 +448,27 @@ export default async (req: Request) => {
         verifiedAt: new Date(),
         orderId: orderRef.id,
       });
+
+      for (const currentProduct of currentProductDocs) {
+        const currentData = currentProduct.data();
+        if (currentData?.stockStatus !== "lowStock") continue;
+
+        const remainingQuantity =
+          typeof currentData.stockQuantity === "number"
+            ? currentData.stockQuantity
+            : 0;
+        const remaining = Math.max(
+          0,
+          remainingQuantity -
+            (requestedByProduct.get(currentProduct.id) ?? 0),
+        );
+        transactionRef.update(currentProduct.ref, {
+          stockStatus: remaining === 0 ? "outOfStock" : "lowStock",
+          stockQuantity: remaining,
+          inStock: remaining > 0,
+          updatedAt: new Date(),
+        });
+      }
 
       // Create the order
       transactionRef.set(orderRef, {
@@ -435,6 +496,7 @@ export default async (req: Request) => {
 
         status: "pending",
         paymentStatus: "paid",
+        inventoryStatus: inventoryAttention ? "attention" : "ok",
 
         createdAt: new Date(),
       });
