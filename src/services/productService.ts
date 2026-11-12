@@ -83,11 +83,16 @@ export async function getProducts(): Promise<Product[]> {
           (image): image is string => typeof image === "string",
         )
       : [];
+    const bundledImages =
+      PRODUCTS.find((product) => product.id === productData.id)?.images ?? [];
     const images =
       catalogueImages.length > 0
-        ? catalogueImages
-        : PRODUCTS.find((product) => product.id === productData.id)?.images ??
-          [];
+        ? catalogueImages.map((image, index) =>
+            /^\/?src\/assets\//.test(image)
+              ? bundledImages[index] ?? bundledImages[0] ?? image
+              : image,
+          )
+        : bundledImages;
     const stockStatus =
       productData.stockStatus === "lowStock" ||
       productData.stockStatus === "outOfStock" ||
