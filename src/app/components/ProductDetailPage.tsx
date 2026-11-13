@@ -110,14 +110,14 @@ export function ProductDetailPage({
         {/* Main layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 mb-24">
           {/* Images */}
-          <Reveal className="flex gap-3">
+          <Reveal className="flex flex-col-reverse gap-3 md:flex-row">
             {/* Thumbnails */}
-            <div className="flex flex-row md:flex-col gap-2.5 w-16 md:w-16 flex-shrink-0">
+            <div className="flex w-full flex-shrink-0 flex-row gap-2.5 overflow-x-auto md:w-16 md:flex-col md:overflow-visible">
               {product.images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className="overflow-hidden"
+                  className="w-16 flex-none overflow-hidden"
                   style={{
                     aspectRatio: "3/4",
                     border:
@@ -136,7 +136,7 @@ export function ProductDetailPage({
             </div>
             {/* Main image */}
             <div
-              className="flex-1 overflow-hidden bg-secondary"
+              className="min-w-0 flex-1 overflow-hidden bg-secondary"
               style={{ aspectRatio: "3/4" }}
             >
               <ImageWithFallback
