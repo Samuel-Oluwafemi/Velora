@@ -13,23 +13,27 @@
 
   The storefront and admin product editor use the Firestore `products`
   collection. Admins can add and edit product details, prices, images, and
-  availability from `/admin`. Product image uploads are stored in Firebase
-  Storage; configure `FIREBASE_STORAGE_BUCKET` in Netlify and grant the
-  Firebase service account permission to create Storage objects. The bucket
-  must be enabled in the Firebase project.
+  availability from `/admin`. Product images are uploaded to Cloudinary when
+  configured; otherwise, the upload function uses Firebase Storage.
 
   Product edits are handled by the `admin-manage-products` Netlify Function.
   Configure `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and
   `FIREBASE_PRIVATE_KEY` for the function, in addition to the public
-  `VITE_FIREBASE_*` settings used by the app. Local Netlify development also
-  needs those server-side credentials and `FIREBASE_STORAGE_BUCKET` (or the
-  configured `VITE_FIREBASE_STORAGE_BUCKET` fallback) for image uploads.
+  `VITE_FIREBASE_*` settings used by the app. To enable Cloudinary uploads,
+  add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
+  `CLOUDINARY_API_SECRET` to the Netlify function environment. Get these from
+  the Cloudinary Console; keep the API secret server-side and never expose it
+  through a `VITE_` variable. Local Netlify development needs the same
+  credentials.
+  If Cloudinary isn't configured, Firebase Storage is used instead; set
+  `FIREBASE_STORAGE_BUCKET` (or `VITE_FIREBASE_STORAGE_BUCKET`) and grant the
+  Firebase service account permission to create Storage objects.
   Public storefront reads go through the `get-products` Netlify Function, which
   returns only catalogue fields and does not require public Firestore read access.
 
   Inventory status and low-stock quantities are stored on each Firestore
-  product document. Product image files live in Firebase Storage; the product
-  document stores their download URLs. Paid order confirmation is always
-  checked against Paystack by the `admin-update-order` function, while order
-  fulfilment status is stored on the order document.
+  product document. Product image files live in Cloudinary or Firebase Storage;
+  the product document stores their download URLs. Paid order confirmation is
+  always checked against Paystack by the `admin-update-order` function, while
+  order fulfilment status is stored on the order document.
   

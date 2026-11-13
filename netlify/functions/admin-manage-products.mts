@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { getStorage } from "firebase-admin/storage";
 import { adminAuth, adminDb } from "./firebase-admin.mjs";
 
@@ -10,6 +10,52 @@ const productCategories = new Set([
   "Accessories",
 ]);
 const productTags = new Set(["New", "Bestseller"]);
+
+async function uploadToCloudinary(image: File, productId: string) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const configuredValues = [cloudName, apiKey, apiSecret].filter(Boolean).length;
+
+  if (configuredValues > 0 && configuredValues < 3) {
+    throw new Error(
+      "Cloudinary setup is incomplete. Configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+    );
+  }
+  if (!cloudName || !apiKey || !apiSecret) return null;
+
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const folder = `velora/products/${productId}`;
+  const signature = createHash("sha1")
+    .update(`folder=${folder}&timestamp=${timestamp}${apiSecret}`)
+    .digest("hex");
+  const formData = new FormData();
+  formData.set("file", image);
+  formData.set("api_key", apiKey);
+  formData.set("timestamp", timestamp);
+  formData.set("folder", folder);
+  formData.set("signature", signature);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`,
+    { method: "POST", body: formData },
+  );
+  const result = (await response.json()) as {
+    secure_url?: unknown;
+    error?: { message?: unknown };
+  };
+
+  if (!response.ok || typeof result.secure_url !== "string") {
+    const providerMessage =
+      typeof result.error?.message === "string"
+        ? result.error.message
+        : "Cloudinary rejected the upload.";
+    console.error("Cloudinary image upload failed:", providerMessage);
+    throw new Error(`Image upload failed: ${providerMessage}`);
+  }
+
+  return result.secure_url;
+}
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -170,6 +216,11 @@ export default async (req: Request) => {
         );
       }
 
+      const cloudinaryUrl = await uploadToCloudinary(image, productId);
+      if (cloudinaryUrl) {
+        return jsonResponse({ success: true, imageUrl: cloudinaryUrl });
+      }
+
       const bucket = getStorage().bucket();
       if (!bucket.name) {
         throw new Error("Firebase Storage bucket is not configured.");
@@ -223,8 +274,31 @@ export default async (req: Request) => {
   } catch (error) {
     console.error("Admin product management error:", error);
     if (isImageUpload) {
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        return jsonResponse(
+          {
+            success: false,
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to upload image to Cloudinary.",
+          },
+          502,
+        );
+      }
+
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      if (/Cloudinary setup is incomplete/.test(errorMessage)) {
+        return jsonResponse(
+          { success: false, message: errorMessage },
+          500,
+        );
+      }
       const message = /permission denied|storage\.objects\.(create|update)|403/i.test(
         errorMessage,
       )
