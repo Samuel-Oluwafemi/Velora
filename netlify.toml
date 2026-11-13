@@ -1,5 +1,6 @@
 [build]
   functions = "netlify/functions"
+  SECRETS_SCAN_OMIT_KEYS = "CLOUDINARY_CLOUD_NAME"
 
 [dev]
   command = "npm run dev"
