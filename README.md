@@ -21,7 +21,9 @@
   Product edits are handled by the `admin-manage-products` Netlify Function.
   Configure `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and
   `FIREBASE_PRIVATE_KEY` for the function, in addition to the public
-  `VITE_FIREBASE_*` settings used by the app.
+  `VITE_FIREBASE_*` settings used by the app. Local Netlify development also
+  needs those server-side credentials and `FIREBASE_STORAGE_BUCKET` (or the
+  configured `VITE_FIREBASE_STORAGE_BUCKET` fallback) for image uploads.
   Public storefront reads go through the `get-products` Netlify Function, which
   returns only catalogue fields and does not require public Firestore read access.
 

@@ -54,10 +54,20 @@ export async function uploadProductImage(
     headers: await adminHeaders(),
     body: formData,
   });
-  const data = (await response.json()) as ProductFunctionResponse;
+  const responseText = await response.text();
+  let data: ProductFunctionResponse | null = null;
+  try {
+    data = JSON.parse(responseText) as ProductFunctionResponse;
+  } catch {
+    throw new Error(
+      `Image upload failed (HTTP ${response.status}). The upload service returned an invalid response.`,
+    );
+  }
 
   if (!response.ok || !data.success || !data.imageUrl) {
-    throw new Error(data.message || "Unable to upload product image.");
+    throw new Error(
+      data.message || `Unable to upload product image (HTTP ${response.status}).`,
+    );
   }
 
   return data.imageUrl;
@@ -88,7 +98,7 @@ export async function getProducts(): Promise<Product[]> {
     const images =
       catalogueImages.length > 0
         ? catalogueImages.map((image, index) =>
-            /^\/?src\/assets\//.test(image)
+            /^\/?(?:src\/assets|assets)\//.test(image)
               ? bundledImages[index] ?? bundledImages[0] ?? image
               : image,
           )

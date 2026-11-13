@@ -13,7 +13,7 @@ import {
 
 interface ProductManagerProps {
   products: Product[];
-  onSaved: (product: Product) => void;
+  onSaved: (product: Product, wasCreated: boolean) => void;
 }
 
 const inputClass =
@@ -28,7 +28,7 @@ function ProductEditor({
 }: {
   product?: Product;
   onClose: () => void;
-  onSaved: (product: Product) => void;
+  onSaved: (product: Product, wasCreated: boolean) => void;
 }) {
   const [productId] = useState(
     () => product?.id ?? `product-${crypto.randomUUID()}`,
@@ -67,6 +67,25 @@ function ProductEditor({
 
     if (images.length + files.length > 8) {
       setError("A product can have up to 8 images.");
+      return;
+    }
+
+    const unsupportedFile = Array.from(files).find(
+      (file) =>
+        !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+          file.type,
+        ),
+    );
+    if (unsupportedFile) {
+      setError("Choose JPG, PNG, WebP, or AVIF image files.");
+      return;
+    }
+
+    const oversizedFile = Array.from(files).find(
+      (file) => file.size === 0 || file.size > 5 * 1024 * 1024,
+    );
+    if (oversizedFile) {
+      setError("Each image must be greater than 0 bytes and no larger than 5 MB.");
       return;
     }
 
@@ -129,7 +148,7 @@ function ProductEditor({
           stockStatus === "lowStock" ? Number(stockQuantity) : undefined,
         inStock: stockStatus !== "outOfStock",
       });
-      onSaved(savedProduct);
+      onSaved(savedProduct, !product);
       onClose();
     } catch (saveError) {
       setError(
@@ -523,8 +542,8 @@ export function ProductManager({ products, onSaved }: ProductManagerProps) {
           key={editorProduct?.id ?? "new-product"}
           product={editorProduct ?? undefined}
           onClose={() => setEditorProduct(null)}
-          onSaved={(product) => {
-            onSaved(product);
+          onSaved={(product, wasCreated) => {
+            onSaved(product, wasCreated);
             setEditorProduct(null);
           }}
         />

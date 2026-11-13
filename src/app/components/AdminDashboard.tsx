@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowUpRight,
@@ -36,8 +36,10 @@ import {
   setOrderStatus as persistOrderStatus,
   syncPaymentStatus,
 } from "../../services/adminOrderService";
+import type { Product } from "./store";
 import { OrderFilters, type OrderSort } from "./admin/OrderFilters";
 import { ProductManager } from "./admin/ProductManager";
+import { Toast } from "./Toast";
 import { CountUp, Reveal } from "./Motion";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -137,6 +139,12 @@ export function AdminDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderActionError, setOrderActionError] = useState("");
   const [orderActionLoading, setOrderActionLoading] = useState(false);
+  const [productToastMessage, setProductToastMessage] = useState<string | null>(
+    null,
+  );
+  const productToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
@@ -158,6 +166,31 @@ export function AdminDashboard() {
         : currentOrder,
     );
   };
+
+  const handleProductSaved = (product: Product, wasCreated: boolean) => {
+    upsertProduct(product);
+    setProductToastMessage(
+      wasCreated
+        ? "New product added successfully."
+        : "Product edited successfully.",
+    );
+    if (productToastTimerRef.current) {
+      clearTimeout(productToastTimerRef.current);
+    }
+    productToastTimerRef.current = setTimeout(() => {
+      setProductToastMessage(null);
+      productToastTimerRef.current = null;
+    }, 3000);
+  };
+
+  useEffect(
+    () => () => {
+      if (productToastTimerRef.current) {
+        clearTimeout(productToastTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const handleOrderStatusChange = async (status: string) => {
     if (!selectedOrder) return;
@@ -546,6 +579,7 @@ export function AdminDashboard() {
 
   return (
     <div className="bg-background min-h-screen flex">
+      {productToastMessage && <Toast message={productToastMessage} />}
       <div className="hidden md:block w-56 flex-shrink-0 h-screen sticky top-0">
         <Sidebar />
       </div>
@@ -743,7 +777,10 @@ export function AdminDashboard() {
             ) : productsLoading ? (
               <p className="text-sm text-muted-foreground">Loading products…</p>
             ) : (
-              <ProductManager products={products} onSaved={upsertProduct} />
+              <ProductManager
+                products={products}
+                onSaved={handleProductSaved}
+              />
             )
           )}
 

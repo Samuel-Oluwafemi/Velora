@@ -130,6 +130,10 @@ export default async (req: Request) => {
     return jsonResponse({ success: false, message: "Method not allowed." }, 405);
   }
 
+  const isImageUpload = req
+    .headers.get("content-type")
+    ?.includes("multipart/form-data");
+
   try {
     if (!(await requireAdmin(req))) {
       return jsonResponse(
@@ -138,7 +142,7 @@ export default async (req: Request) => {
       );
     }
 
-    if (req.headers.get("content-type")?.includes("multipart/form-data")) {
+    if (isImageUpload) {
       const formData = await req.formData();
       const productId = formData.get("productId");
       const image = formData.get("image");
@@ -218,6 +222,21 @@ export default async (req: Request) => {
     return jsonResponse({ success: true, product: data });
   } catch (error) {
     console.error("Admin product management error:", error);
+    if (isImageUpload) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const message = /permission denied|storage\.objects\.(create|update)|403/i.test(
+        errorMessage,
+      )
+        ? "Firebase Storage rejected the upload. Check that the service account can create files in the configured bucket."
+        : /bucket.*(missing|undefined|not configured)|bucket name/i.test(
+              errorMessage,
+            )
+          ? "Firebase Storage is not configured. Set FIREBASE_STORAGE_BUCKET for the Netlify function."
+          : "Unable to upload product image. Check the Netlify function logs for the Storage error.";
+      return jsonResponse({ success: false, message }, 500);
+    }
+
     return jsonResponse(
       { success: false, message: "Unable to save the product." },
       500,
